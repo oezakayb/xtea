@@ -1,6 +1,6 @@
 #include "xtea_v2.h"
 
-void xtea_v2(long * v, long * k, long N) {
+void xtea_v3(long * v, long * k, long N) {
     unsigned long y=v[0], z=v[1], DELTA=0x9e3779b9 ;
     if (N>0) {
 /* coding */

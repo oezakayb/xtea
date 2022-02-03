@@ -1,5 +1,5 @@
-#ifndef XTEA_V0_H_   /* Include guard */
-#define XTEA_V0_H_
+#ifndef VERSION_DEFINER_H_   /* Include guard */
+#define VERSION_DEFINER_H_
 #include "xtea_v0.h"
 #include "xtea_v1.h"
 #include "xtea_v2.h"

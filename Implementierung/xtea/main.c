@@ -10,21 +10,24 @@
 #include "version_definer.h"
 
 const char* usage_msg =
-        "Usage: %s file [options]   Encrypts file\n"
-        "   or: %s -h / --help   Show help message and exit\n";
+        "Usage: %s file [options]   Encrypts file with predefined key\n"
+        "   or: %s -h / --help   Show all options\n";
 
 const char* help_msg =
         "Positional arguments:\n"
         "  file   The file to encrypt or decrypt\n"
         "\n"
         "Optional arguments:\n"
-        "  -V X   Runs the chosen version of implementation \n"
-        "       V0: Our Assembly implementation (default), V1: Our C implementation, V2: Reference C code of Needham and Wheeler\n"
-        "  -B X   The program will run for X times and the total runtime of this implementation will be measured"
+        "  -V X   Runs the chosen version of implementation\n"
+        "       V0: Our Assembly implementation (default)\n"
+        "       V1: Our C implementation\n"
+        "       V2: Our C implementation with precalculated sum values\n"
+        "       V3: Reference C code of Needham and Wheeler\n"
+        "  -B X   The program will run for X times and the total runtime of the given version of implementation will be measured\n"
         "       and printed (default: X = 1)\n"
         "  -k X   A 128-bit integer key for encrypting and decrypting\n"
         "  -i X   The initialization vector (32-bit integer)\n"
-        "  -o X  The output file\n"
+        "  -o X   The output file\n"
         "  -h / --help   Show help message (this text) and exit\n";
 
 void print_usage(const char* progname) {
@@ -52,12 +55,19 @@ int main(int argc, char** argv) {
     int b;
     bool bbool = false;
     bool d = false;
-    const uint32_t keys[4] = {0XAAAAAAAA,
-                              0XAAAAAAAA,
-                              0XAAAAAAAA,
-                              0XAAAAAAAA};
+    uint32_t keys[4] = {0X61737061,
+                        0X73706173,
+                        0X70617370,
+                        0X61737061};
     uint32_t initVec = 0;
     FILE *output = NULL;
+
+    const unsigned long [64] sums;
+    sums[0] = 0;
+
+    for (int i = 1; i < 64; ++i) {
+        sums[i] = sums[i - 1] + 0x9E3779B9;
+    }
 
     struct option long_options[] = {
             {"help",    0,              NULL, 'h'},
@@ -68,17 +78,12 @@ int main(int argc, char** argv) {
         switch (opt) {
             case 'V':
                 v = atoi(optarg);
-                if(v != 0)
-                {
-                    fprintf(stderr, "Sorry, only V0 available right now.\n");
-                }
                 break;
             case 'B':
                 bbool = true;
                 b = atoi(optarg);
-                printf("%d\n", b);
                 if(b == 0){
-                    fprintf(stderr, "Argument of B was 0 or not an integer.\n");
+                    fprintf(stderr, "Argument of B is 0 or not an integer.\n");
                     print_usage(progname);
                     return EXIT_FAILURE;
                 }
@@ -97,7 +102,7 @@ int main(int argc, char** argv) {
             case 'o':
                 output = fopen(optarg, "w");
                 if(output == NULL){
-                    fprintf(stderr, "Output file could not be opened or it does not exist.\n");
+                    fprintf(stderr, "Output file could not be opened.\n");
                     print_usage(progname);
                     return EXIT_FAILURE;
                 }
@@ -150,35 +155,18 @@ int main(int argc, char** argv) {
 
     switch(bbool){
         case true:
-            if(d != true){
-                clock_t t = clock();
-                for (int i = 0; i < b; ++i) {
-                    xtea_encrypt_block(values, keys);
-                }
-                t = clock() - t;
-                double time_taken = ((double)t)/CLOCKS_PER_SEC;
-
-                printf("It took %f seconds to encrypt %i times.\n", time_taken, b);
+            clock_t t = clock();
+            for (int i = 0; i < b; ++i) {
+                define_version(v, d, values, keys);
             }
-            else{
-                clock_t t = clock();
-                for (int i = 0; i < b; ++i) {
-                    xtea_decrypt_block(values, keys);
-                }
-                t = clock() - t;
-                double time_taken = ((double)t)/CLOCKS_PER_SEC;
+            t = clock() - t;
+            double time_taken = ((double)t)/CLOCKS_PER_SEC;
 
-                printf("It took %f seconds to decrypt %i times.\n", time_taken, b);
-            }
+            printf("It took %f seconds to encrypt %i times.\n", time_taken, b);
             break;
 
         case false:
-            if(d != true){
-                xtea_encrypt_block(values, keys);
-            }
-            else{
-                xtea_decrypt_block(values, keys);
-            }
+            define_version(v, d, values, keys);
             break;
 
     }
