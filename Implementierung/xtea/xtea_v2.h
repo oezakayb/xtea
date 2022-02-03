@@ -1,0 +1,1 @@
+void xtea_v2( long * v, long * k, long N);

@@ -1,0 +1,56 @@
+#include "xtea.S"
+
+encrypt(uint32_t* blocks, const uint32_t* keys);
+
+
+int main(int argc, char** argv) {
+
+    const char* progname = argv[0];
+
+    if (argc == 1) {
+        print_usage(progname);
+        return EXIT_FAILURE;
+    }
+
+
+    double a = 0.0, b = 1.0;
+    size_t n = 2;
+    int opt;
+    while((opt = getopt(argc, argv, "a:b:n:th")) != -1){
+        switch(opt){
+            case a':
+                a = atof(optarg);
+                break;
+            case 'b':
+                b = atof(optarg);
+                break;
+            case 'n':
+                n = atol(optarg);
+                break;
+            case 't':
+                return tests() ? EXIT_FAILURE : EXIT_SUCCESS;
+            case 'h':
+                print_help(progname);
+                return EXIT_SUCCESS;
+            default:
+                print_usage(progname);
+                return EXIT_FAILURE;
+        }
+
+    }
+
+    const char* fn_name = "fn_x";
+    Func fn = get_fn(fn_name);
+    if (!fn) {
+        fprintf(stderr, "%s: Invalid value for 'fn' -- %s\n", progname,
+                fn_name);
+        print_usage(progname);
+        return EXIT_FAILURE;
+    }
+
+    printf("numquad(%s, %f, %f, %zu) = %f\n", fn_name, a, b, n,
+           numquad(fn, a, b, n));
+
+    return EXIT_SUCCESS;
+}
+
