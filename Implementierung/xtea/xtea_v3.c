@@ -1,7 +1,7 @@
-#include "xtea_v2.h"
+#include "xtea_v3.h"
 
-void xtea_v3(long * v, long * k, long N) {
-    unsigned long y=v[0], z=v[1], DELTA=0x9e3779b9 ;
+void xtea_v3(uint32_t * v, const uint32_t * k, long N) {
+    uint32_t y=v[0], z=v[1], DELTA=0x9e3779b9 ;
     if (N>0) {
 /* coding */
         unsigned long limit=DELTA*N, sum=0 ;

@@ -1,6 +1,6 @@
 #include "xtea_v1.h"
 
-void xtea_encrypt_block_v1(uint32_t [2] blocks, const uint32_t [4] keys){
+void xtea_encrypt_block_v1(uint32_t blocks [2], const uint32_t keys [4]){
 
     uint32_t sigma = 0x9E3779B9;
     uint32_t v0 = blocks[0];
@@ -18,7 +18,7 @@ void xtea_encrypt_block_v1(uint32_t [2] blocks, const uint32_t [4] keys){
 
 }
 
-void xtea_decrypt_block_v1(uint32_t [2] blocks, const uint32_t [4] keys){
+void xtea_decrypt_block_v1(uint32_t blocks [2], const uint32_t keys [4]){
 
     uint32_t sigma = 0x9E3779B9;
     uint32_t v0 = blocks[0];
@@ -35,7 +35,7 @@ void xtea_decrypt_block_v1(uint32_t [2] blocks, const uint32_t [4] keys){
     blocks[1] = v1;
 }
 
-void xtea_encrypt_block_v2(const unsigned long [64] sums, uint32_t [2] blocks, const uint32_t [4] keys){
+void xtea_encrypt_block_v2(unsigned long sums [64], uint32_t blocks [2], const uint32_t keys [4]){
 
     uint32_t v0 = blocks[0];
     uint32_t v1 = blocks[1];
@@ -55,7 +55,7 @@ void xtea_encrypt_block_v2(const unsigned long [64] sums, uint32_t [2] blocks, c
 
 }
 
-void xtea_decrypt_block_v2(const unsigned long [64] sums, uint32_t [2] blocks, const uint32_t [4] keys){
+void xtea_decrypt_block_v2(unsigned long sums [64], uint32_t blocks [2], const uint32_t keys [4]){
 
     uint32_t v0 = blocks[0];
     uint32_t v1 = blocks[1];

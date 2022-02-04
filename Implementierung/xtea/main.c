@@ -10,7 +10,7 @@
 #include "version_definer.h"
 
 const char* usage_msg =
-        "Usage: %s file [options]   Encrypts file with predefined key\n"
+        "Usage: %s file [options]   Encrypts file. Try -h to see the options\n"
         "   or: %s -h / --help   Show all options\n";
 
 const char* help_msg =
@@ -62,11 +62,10 @@ int main(int argc, char** argv) {
     uint32_t initVec = 0;
     FILE *output = NULL;
 
-    const unsigned long [64] sums;
-    sums[0] = 0;
+    unsigned long sums [64];
 
-    for (int i = 1; i < 64; ++i) {
-        sums[i] = sums[i - 1] + 0x9E3779B9;
+    for (int i = 0; i < 64; ++i) {
+        sums[i] = i * 0x9E3779B9;
     }
 
     struct option long_options[] = {
@@ -74,7 +73,7 @@ int main(int argc, char** argv) {
             {0,         0,                 0,  0 }
     };
 
-    while((opt = getopt_long(argc, argv, "V:B:k:i:O:dhhelp", long_options, 0)) != -1) {
+    while((opt = getopt_long(argc, argv, "V:B:k:i:o:dhhelp", long_options, 0)) != -1) {
         switch (opt) {
             case 'V':
                 v = atoi(optarg);
@@ -92,11 +91,12 @@ int main(int argc, char** argv) {
                 d = true;
                 break;
             case 'k':
+                printf("Can't parse key right now. Predefined key will be used.\n");
                 break;
             case 'i':
                 initVec = atoi(optarg);
                 for(int i = 0; i < 4; i++){
-                    //keys[i] = keys[i] & initVec + initVec;
+                    keys[i] = (keys[i] & initVec + initVec) & 0xFFFFFFFF;
                 }
                 break;
             case 'o':
@@ -133,48 +133,134 @@ int main(int argc, char** argv) {
     size_t valueLen = fread(value, 1, fileStat.st_size, file);
     fclose(file);
 
-    //valueLen >< 8 pad
-
-    uint32_t values[2];
-
-    for (int i = 0; i < 2; ++i) {
-        uint8_t tempChar[5];
-        tempChar[4] = '\0';
-        strncpy(tempChar, &value[i*4], 4);
-        uint32_t tempInt32 [4] = {tempChar[0], tempChar[1], tempChar[2], tempChar[3]};
-
-        values[i] = (tempInt32[0] << 24) | (tempInt32[1] << 16) | (tempInt32[2] << 8) | (tempInt32[3]);
-        printf("%d\n", values[i]);
+    if(valueLen == 0){
+        fprintf(stderr, "Message length was 0.\n");
+        print_usage(progname);
+        return EXIT_FAILURE;
     }
 
-    //free(value);
+    unsigned int blockCount = valueLen / 8;
+    uint8_t padBytes = (-valueLen) & 7;
+
+    if(padBytes != 0) {
+        uint8_t valueTemp[valueLen + padBytes + 1];
+        valueTemp[valueLen + padBytes] = '\0';
+        strncpy(valueTemp, value, valueLen);
+        free(value);
+
+        for (int i = valueLen; i < valueLen + padBytes; ++i) {
+            valueTemp[i] = padBytes;
+        }
+
+
+        value = malloc(sizeof(*value) * (valueLen + padBytes + 1));
+        strncpy(value, valueTemp, valueLen + padBytes + 1);
+        blockCount++;
+    }
+
+    printf("%s\n", (char*)value);
+
+
+    printf("%d\n", blockCount);
+    printf("%d\n", padBytes);
+
+    uint32_t values[blockCount][2];
+
+    for (int k = 0; k < blockCount; ++k) {
+        for (int i = 0; i < 2; ++i) {
+            uint8_t tempChar[4];
+            strncpy(tempChar, &value[k * 8 + i * 4], 4);
+            uint32_t tempInt32 [4] = {tempChar[0], tempChar[1], tempChar[2], tempChar[3]};
+
+            values[k][i] = (tempInt32[0] << 24) | (tempInt32[1] << 16) | (tempInt32[2] << 8) | (tempInt32[3]);
+            printf("%X\n", values[k][i]);
+        }
+    }
+
+    if(padBytes == 0)
+    {
+        free(value);
+    }
+
 
     if(output == NULL){
         output = fopen("output.txt", "w");
     }
 
+    uint8_t* outputStr = malloc(sizeof(*outputStr) * (valueLen + padBytes + 1));
+    outputStr[valueLen + padBytes] = '\0';
+    uint8_t* charCounter = outputStr;
+
     switch(bbool){
         case true:
-            clock_t t = clock();
+        {clock_t t = clock();
             for (int i = 0; i < b; ++i) {
-                define_version(v, d, values, keys);
+                for (int j = 0; j < blockCount; ++j) {
+                    define_version(v, d, sums, values[j], keys);
+
+                    for (int k = 0; k < 2; ++k) {
+                        uint8_t tempChar[5];
+                        tempChar[4] = '\n';
+                        tempChar[0] = (values[j][k] >> 24) & 0x000000FF;
+                        tempChar[1] = (values[j][k] >> 16) & 0x000000FF;
+                        tempChar[2] = (values[j][k] >> 8) & 0x000000FF;
+                        tempChar[3] = (values[j][k]) & 0x000000FF;
+                        strncpy(charCounter, &tempChar[0], 4);
+                        charCounter += 4;
+                    }
+
+
+                }
             }
             t = clock() - t;
             double time_taken = ((double)t)/CLOCKS_PER_SEC;
 
             printf("It took %f seconds to encrypt %i times.\n", time_taken, b);
             break;
+        }
 
         case false:
-            define_version(v, d, values, keys);
+            for (int i = 0; i < blockCount; ++i) {
+                define_version(v, d, sums, values[i], keys);
+                for (int k = 0; k < 2; ++k) {
+                    uint8_t tempChar[5];
+                    tempChar[4] = '\n';
+                    tempChar[0] = (values[i][k] >> 24) & 0x000000FF;
+                    tempChar[1] = (values[i][k] >> 16) & 0x000000FF;
+                    tempChar[2] = (values[i][k] >> 8) & 0x000000FF;
+                    tempChar[3] = (values[i][k]) & 0x000000FF;
+                    strncpy(charCounter, &tempChar[0], 4);
+                    charCounter += 4;
+                }
+            }
             break;
 
     }
 
+    if(d == true && (outputStr[strlen(outputStr) - 2] < 8 && outputStr[strlen(outputStr) - 2] > 0)){
+        uint8_t counter = 0;
+        size_t outputLen = strlen(outputStr);
+        uint8_t lastChar = outputStr[outputLen - 1];
+        if(lastChar == outputStr[outputLen - 2]){
+            counter += 2;
+        }
 
-    free(value);
+        for (int i = outputLen - 3; i > outputLen - 8; i--) {
+            if(outputStr[i] != lastChar){
+                break;
+            }
+            counter++;
+        }
 
 
+        uint8_t* outputTemp = malloc(sizeof(*outputTemp) * (valueLen - counter));
+        outputTemp[valueLen - counter - 1] = '\0';
+        strncpy(outputTemp, &outputStr[0], valueLen - counter);
+        free(outputStr);
+        outputStr = outputTemp;
+    }
+
+    fwrite(outputStr, sizeof(*outputStr), strlen(outputStr), output);
 
     return EXIT_SUCCESS;
 }
