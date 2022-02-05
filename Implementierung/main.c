@@ -22,7 +22,9 @@ const char* help_msg =
         "       V0: Our Assembler implementation (default)\n"
         "       V1: Our C implementation\n"
         "       V2: Our C implementation with precalculated sum values\n"
-        "       V3: Reference C implementation of Needham and Wheeler\n"
+        "       V3: Assembler implementation with precalculated sum values compiled from V2 with Intrinsics optimisation\n"
+        "           -O2\n"
+        "       V4: Reference C implementation of Needham and Wheeler\n"
         "  -B X   The program will run for X times and the total runtime of the given version of implementation will be measured\n"
         "       and printed\n"
         "  -k X   A 128-bit integer key for encrypting and decrypting\n"
@@ -56,10 +58,10 @@ int main(int argc, char** argv) {
     bool bbool = false;
     bool d = false;
     //keys = aspa spas pasp aspa
-    uint32_t keys[4] = {0X61737061,
-                        0X73706173,
-                        0X70617370,
-                        0X61737061};
+    uint32_t keys[4] = {0X41535041,
+                        0X53504153,
+                        0X50415350,
+                        0X41535041};
     uint32_t initVec = 0;
     FILE *output = NULL;
 
@@ -247,6 +249,7 @@ int main(int argc, char** argv) {
         case false:
             for (int i = 0; i < blockCount; ++i) {
                 define_version(v, d, sums, values[i], keys);
+                printf("%X\n", values[i][0]);
                 for (int k = 0; k < 2; ++k) {
                     uint8_t tempChar[5];
                     tempChar[4] = '\n';
@@ -257,6 +260,7 @@ int main(int argc, char** argv) {
                     strncpy(charCounter, &tempChar[0], 4);
                     charCounter += 4;
                 }
+
             }
             break;
 

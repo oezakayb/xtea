@@ -17,12 +17,20 @@ void define_version(int version, bool d, unsigned long sums [64], uint32_t block
                 xtea_encrypt_block_v2(sums, blocks, keys);
             }break;
 
-        case 3:{
+        case 3:
+            if(d == true){
+                xtea_decrypt_block_v3(blocks, keys);
+            }else{
+                xtea_encrypt_block_v3(blocks, keys);
+            }break;
+
+
+        case 4:{
 
             if(d == true){
-                xtea_v3(blocks, keys, -64);
+                xtea_v4(blocks, keys, -64);
             }else{
-                xtea_v3(blocks, keys, 64);
+                xtea_v4(blocks, keys, 64);
             }break;
         }
         default:

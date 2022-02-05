@@ -2,7 +2,7 @@
 
 //the original implementation by Needham and Wheeler used long integers for v and k and then saved them as unsigned long integers
 //before starting the loop but for program consistency uint32_t was chosen as data types for v and k
-void xtea_v3(uint32_t * v, const uint32_t * k, long N) {
+void xtea_v4(uint32_t * v, const uint32_t * k, long N) {
     uint32_t y=v[0], z=v[1], DELTA=0x9e3779b9 ;
     if (N>0) {
 /* coding */

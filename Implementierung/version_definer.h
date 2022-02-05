@@ -3,6 +3,7 @@
 #include "xtea_v0.h"
 #include "xtea_v1.h"
 #include "xtea_v3.h"
+#include "xtea_v4.h"
 #include <stdint.h>
 #include <stdbool.h>
 

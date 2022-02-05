@@ -7,8 +7,16 @@ void xtea_encrypt_block_v1(uint32_t blocks [2], const uint32_t keys [4]){
     uint32_t v1 = blocks[1];
     unsigned long sum = 0;
 
-    for (int i = 0; i < 64; ++i) {
-        v0 += ((((v1 << 4) ^ (v1 >> 5)) + v1) ^ (sum + keys[sum & 3]));
+    for (int i = 0; i < 1; ++i) {
+        uint32_t vtemp1 = (v1 << 4);
+        printf("%X\n", vtemp1);
+        uint32_t vtemp2 = (v1 >> 5);
+        printf("%X\n", vtemp2);
+        vtemp1 = (vtemp1 ^ vtemp2);
+        printf("%X\n", vtemp1);
+        vtemp1 += v1;
+        printf("%X\n", vtemp1);
+        v0 += (vtemp1 ^ (sum + keys[sum & 3]));
         sum += sigma;
         v1 += ((((v0 << 4) ^ (v0 >> 5)) + v0) ^ (sum + keys[(sum >> 11) & 3]));
     }
