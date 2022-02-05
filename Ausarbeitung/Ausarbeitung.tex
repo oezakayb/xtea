@@ -22,7 +22,9 @@ Im Rahmen unseres Projektes im Fach Aspekte der systemnahen Programmierung bei d
 \newpage
 \section{Lösungsansatz}
 \subsection*{2.1.Feistelchiffre }
-Der XTEA Algorithmus ist ein Verschlüsselungsalgorithmus, welche auf die Struktur von Feistelchiffre basiert ist. Feistelchiffre ist eine Struktur, die für symmetrische Verschlüsselung verwendet wird. Unter symmetrische Verschlüsselung ist zu verstehen, dass für die Ver- und Entschlüsselung nur ein Key verwendet wird. Wir würden daher erstmal mit Feistelchiffre, die grundstruktur der symmetrische Verschlüsselung, eingehen.\\
+Der XTEA Algorithmus ist ein Ver -und Ent
+
+schlüsselungsalgorithmus, welche auf die Struktur von Feistelchiffre basiert ist. Feistelchiffre ist eine Struktur, die für symmetrische Verschlüsselung verwendet wird. Unter symmetrische Verschlüsselung ist zu verstehen, dass für die Ver- und Entschlüsselung nur ein Key verwendet wird. Wir würden daher erstmal mit Feistelchiffre, die grundstruktur der symmetrische Verschlüsselung, eingehen.\\
 Feistelchiffre lässt sich in vier Schritten aufteilen. Zuerst hat man ein Klartextblock mit der Nachricht, weche meist 8 Bytes ist, und teilt diese in zwei gleich große Bl\"ocke L0 und R0, die 4 Bytes entsprechen auf.
 
 \begin{table}[H]
@@ -311,25 +313,31 @@ Zusammengefasst lässt sich sagen, wenn die zu verschlüsselden Daten kürzer al
      \hline 	       & V0 & V1 & V1 + O & V2 & V2 + O  & V3  \\
      \hline 1000 & 0.000515 & 41 & 53 & 50 & 03  & 03  \\
 	 \hline 5000 & 0.002765 & 41 & 53 & 50 & 03  & 03  \\
-	 \hline 10 000 & 20 & 41 & 53 & 50 & 03  & 03  \\
-	 \hline 50 000 & 20 & 41 & 53 & 50 & 03  & 03  \\
-     \hline 100 000 & 20 & 41 & 53 & 50 & 03  & 03  \\
-	 \hline 500 000 & 20 & 41 & 53 & 50 & 03  & 03  \\
-	 \hline 1 000 000 & 20 & 41 & 53 & 50 & 03  & 03  \\
-	 \hline 5 000 000 & 20 & 41 & 53 & 50 & 03  & 03  \\
-     \hline 10 000 000 & 20 & 41 & 53 & 50 & 03  & 03  \\
-	 \hline 50 000 000 & 20 & 41 & 53 & 50 & 03  & 03  \\
-	 \hline 100 000 000 & 20 & 41 & 53 & 50 & 03  & 03  \\
-	 \hline 500 000 000 & 20 & 41 & 53 & 50 & 03  & 03  \\
+	 \hline 10 000 & 0.004291 & 41 & 53 & 50 & 03  & 03  \\
+	 \hline 50 000 & 0.016369 & 41 & 53 & 50 & 03  & 03  \\
+     \hline 100 000 & 0.033843 & 41 & 53 & 50 & 03  & 03  \\
+	 \hline 500 000 & 0.161601 & 41 & 53 & 50 & 03  & 03  \\
+	 \hline 1 000 000 & 0.276192 & 41 & 53 & 50 & 03  & 03  \\
+	 \hline 5 000 000 & 1.513316 & 41 & 53 & 50 & 03  & 03  \\
+     \hline 10 000 000 & 2.789830 & 41 & 53 & 50 & 03  & 03  \\
+	 \hline 50 000 000 & 1.513316 & 41 & 53 & 50 & 03  & 03  \\
+	 \hline 100 000 000 & 2.789830 & 41 & 53 & 50 & 03  & 03  \\
+	 \hline 500 000 000 & 15.390260 & 41 & 53 & 50 & 03  & 03  \\
      \hline 1 000 000 000 & 20 & 41 & 53 & 50 & 03  & 03  \\
 	\hline
     \end{tabular}
-    \caption{Block 2: e ASP mit Padding}
+    \caption{Legende}
 \end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[scale = 0.4]{Analyse.png}
+\caption{Beschreibung}
+\end{figure}
 \newpage
 
 \section{Zusammenfassung und Ausblick}
-
+XTEA ist ein komplexer Ver -und Entschlüsselungsalgorithmus, der eine weitere Entwicklung von TEA ist.
 \newpage
 % TODO: Fuegen Sie Ihre Quellen der Datei Ausarbeitung.bib hinzu
 % Referenzieren Sie diese dann mit \cite{}.
