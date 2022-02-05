@@ -129,7 +129,14 @@ int main(int argc, char** argv) {
 
     struct stat fileStat;
     fstat(fileno(file), &fileStat);
-    uint8_t* value = malloc(sizeof(*value) * (fileStat.st_size + 1)); //Consider the Null Byte
+    uint8_t* value = malloc(sizeof(*value) * (fileStat.st_size + 1));
+
+    if(value == NULL){
+        fprintf(stderr, "No free memory.\n");
+        print_usage(progname);
+        return EXIT_FAILURE;
+    }
+
     value[fileStat.st_size] = '\0';
     size_t valueLen = fread(value, 1, fileStat.st_size, file);
     fclose(file);
@@ -145,6 +152,13 @@ int main(int argc, char** argv) {
 
     if(padBytes != 0) {
         uint8_t* valueTemp = malloc(sizeof(*valueTemp) * (valueLen + padBytes + 1));
+
+        if(valueTemp == NULL){
+            fprintf(stderr, "No free memory.\n");
+            print_usage(progname);
+            return EXIT_FAILURE;
+        }
+
         valueTemp[valueLen + padBytes] = '\0';
         strncpy(valueTemp, value, valueLen);
         free(value);
@@ -154,6 +168,13 @@ int main(int argc, char** argv) {
         }
 
         value = malloc(sizeof(*value) * (valueLen + padBytes + 1));
+
+        if(value == NULL){
+            fprintf(stderr, "No free memory.\n");
+            print_usage(progname);
+            return EXIT_FAILURE;
+        }
+
         strncpy(value, valueTemp, valueLen + padBytes + 1);
         free(valueTemp);
         blockCount++;
@@ -178,6 +199,13 @@ int main(int argc, char** argv) {
     }
 
     uint8_t* outputStr = malloc(sizeof(*outputStr) * (valueLen + padBytes + 1));
+
+    if(outputStr == NULL){
+        fprintf(stderr, "No free memory.\n");
+        print_usage(progname);
+        return EXIT_FAILURE;
+    }
+
     outputStr[valueLen + padBytes] = '\0';
     uint8_t* charCounter = outputStr; //second pointer for concatting to outputStr but also not lose the array begin
 
@@ -261,6 +289,13 @@ int main(int argc, char** argv) {
 
 
         uint8_t* outputTemp = malloc(sizeof(*outputTemp) * (valueLen - counter));
+
+        if(outputTemp == NULL){
+            fprintf(stderr, "No free memory.\n");
+            print_usage(progname);
+            return EXIT_FAILURE;
+        }
+
         outputTemp[valueLen - counter - 1] = '\0';
         strncpy(outputTemp, &outputStr[0], valueLen - counter);
         free(outputStr);
