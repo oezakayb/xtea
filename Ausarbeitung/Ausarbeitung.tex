@@ -85,13 +85,13 @@ Die Entschlüsselung funktioniert im Prinzip genau wie die Verschlüsselung. Nur
 
 \subsection*{2.2.XTEA}
 Die Aufgabe des Projekts liegt darin den XTEA Algorithmus sowohl in C als auch in Assembler zu implmentieren. Für die Implementierung der XTEA Algorithmus soll man zunächst wissen wie XTEA überhaupt funktioniert. \\
-Das Verfahren von XTea ist auf Feistelchiffre basiert. Der eingelesene Wert, welcher 8 Byte entspricht, wird in zwei Blocken aufgeteilt, V1 und V2. Für XTea brauchen wir zusätzlich noch eine weitere Variable s, die Summe, die immer nach der Verschlüsselung Vvon 1 mit der magischen Zahl ${\delta}$ addiert wird. ${\delta}$ lässt sich aus der Formel:
+Das Verfahren von XTea ist auf Feistelchiffre basiert. Der eingelesene Wert, welcher 8 Byte entspricht, wird in zwei Blocken aufgeteilt, V1 und V2. Der Schlüssel bei XTEA beträgt 16 Bytes und wird in vier aufgeteilt, die jeweils 4 Bytes entsprichen. Für XTea brauchen wir zusätzlich noch eine weitere Variable s, die Summe, die immer nach der Verschlüsselung Vvon 1 mit der magischen Zahl ${\delta}$ addiert wird. ${\delta}$ lässt sich aus der Formel:
 \begin{equation}
      \delta  =   \lfloor ( \surd 5 -1)  \cdot  2^{31} \rfloor
 \end{equation}
 berechnen. Jede Runde findet eine doppelte Verschlüsselung statt. \\
-Zuerst ist die Verschlüsselung von V1. Da wird V2 in zwei Blöcken geshiftet. Block 1 ist V2 << 4 und Block ist V2 >>5. Die zwei Blöcken werden per XOR zu einem neuen Wert abgebildet und zu V2 addiert. Danach wird V2 mit der Summe von s, welche am Anfang Null ist, und der Schlüssel, dessen Index aus der Variable s Modulo drei ergibt, per XOR abgebildet. Das Ergebnis wird zum Schluss auf V1 addiert. \\
-Zur veranschaulichung nehmen wir wieder das Beispielwort "BEISPIEL". Und teilen dieses Wort in V1 und V2 auf. 
+Zuerst ist die Verschlüsselung von V1. Da wird V2 in zwei Blöcken geshiftet. Block 1: V2 << 4 und Block: V2 >>5. Die zwei Blöcken werden per XOR zu einem neuen Ergebnis abgebildet und mit V2 addiert. Danach wird das Ergebnis mit der Summe von s, welche am Anfang Null ist, und der Schlüssel, dessen Index aus der Variable s Modulo drei ergibt, per XOR abgebildet. Zum Schluss wird das Ergebnis auf V1 addiert. \\
+Zur veranschaulichung nehmen wir wieder das Beispielwort "BEISPIEL", in Hex Code. Und teilen dieses Wort in V1 und V2 auf.  
 \begin{table}[H]
     
     \begin{minipage}{.5\linewidth}
@@ -117,8 +117,19 @@ Zur veranschaulichung nehmen wir wieder das Beispielwort "BEISPIEL". Und teilen 
 \caption{V2} 
     \end{minipage}
 \end{table}
+
+\begin{table}[H]
+\centering 
+    \begin{tabular}{|l|l|l|l||l|l|l|l||l|l|l|l||l|l|l|l|}
+        \hline
+        41 & 53 & 50 & 41 & 53 & 50 & 41 & 53  & 50 & 41 & 53 & 50 & 41 & 53 & 50 & 41 \\
+        \hline
+    \end{tabular}
+    \caption{Key}
+\end{table}
+
  
-Anschließend follgt das Shiften von V2. Die XOR Operation wird danach an den beiden Blöcken ausgeführt.
+Anschließend follgt das Shiften von V2 und die XOR Operation wird danach an den beiden Blöcken ausgeführt.
 \begin{table}[H]
     
     \begin{minipage}{.5\linewidth}
@@ -149,28 +160,60 @@ Anschließend follgt das Shiften von V2. Die XOR Operation wird danach an den be
 \centering 
     \begin{tabular}{|l|l|l|l|}
         \hline
-        06 & 10 & 1d & es    \\
+        06 & 10 & 1D & EA    \\
         \hline
     \end{tabular}
-    \caption{V2 << 4 $\oplus$ V2 >> 5}
+    \caption{(V2 << 4) $\oplus$ (V2 >> 5)}
 \end{table}
-Das Ergebnis wieder auf V2 addiert und 
-  
+Das Ergebnis wird mit V2 addiert. Als nächstes wird die XOR Operation, zwischen dem Ergebnis und der Summe von s und Key, ausgeführt. Da bei der ersten Runde s immer Null ist, wird immer K[0] genommen. 
+\begin{table}[H]
+\centering 
+    \begin{tabular}{|l|l|l|l|}
+        \hline
+        56 & 59 & 43 & 36    \\
+        \hline
+    \end{tabular}
+    \caption{((V2 << 4) $\oplus$ (V2 >> 5)) + V2}
+\end{table}
+
+\begin{table}[H]
+\centering 
+    \begin{tabular}{|l|l|l|l|}
+        \hline
+        41 & 53 & 50 & 41    \\
+        \hline
+    \end{tabular}
+    \caption{K[0]}
+\end{table}
+
+\begin{table}[H]
+\centering 
+    \begin{tabular}{|l|l|l|l|}
+        \hline
+        17 & 0A & 13 & 77    \\
+        \hline
+    \end{tabular}
+    \caption{(((V2 << 4) $\oplus$ (V2 >> 5)) + V2) $\oplus$ (s + K[s\& 3])}
+\end{table}
+Zum Schluss wird das Ergebnis zu V1 addiert.
+
+\begin{table}[H]
+\centering 
+    \begin{tabular}{|l|l|l|l|}
+        \hline
+        59 & 4F & 5C & CA    \\
+        \hline
+    \end{tabular}
+    \caption{((((V2 << 4) $\oplus$ (V2 >> 5)) + V2) $\oplus$ (s + K[s\& 3])) + V1}
+\end{table}
 
 
 
-
-
-
-
-
-Die Variable s wird jetzt um die magische Zahl erhöht. Für V2 funktioniert die Verschlüsselung ähnlich wie bei V1. Wir teilen V1 in zwei Hälften auf und genau sowie bei V1, werden die zwei Hälften per XOR zu einem neuen Wert dargestellt und zu V2 addiert. V2 verschlüsselt sich dann per XOR mit der Summe von s und der Schlüssel, dessen Index jetzt aus s shift 11 Modulo 3 besteht. 
-
-Die Vorgehensweise beide Verfahren haben Gemeinsamkeiten und Unterschiede. Da XTea auf Feistelchiffre basiert ist, erkennt man auch das symmetrische Verschlüsselungsverfahren bei ihm, d.h. für die Ver- und Entschlüsselung der Nachricht wird denselben Schlüssel verwendet. Bei beidem wird am Anfang der Verschlüsselung die zu verschlüsselnden Daten in zwei Blöcken aufgeteilt und das Verschlüsselungsprozess kann zu mehreren Runden dauern. Die Länge der zu verschlüsselnden Daten muss immer ein Vielfaches der Block-länge sein. Auch das Benutzen von XOR kann man bei beiden Verfahren finden. 
+Die Variable s wird jetzt um die magische Zahl erhöht. Für V2 funktioniert die Verschlüsselung ähnlich wie bei V1. Wir teilen V1 in zwei Blöcken durch das Shiften auf und genau sowie bei V1, werden die zwei Blöcken per XOR zu einem neuen Ergebnis dargestellt und mit V1 addiert. Das Ergebnis verschlüsselt sich dann per XOR mit der Summe von s und der Schlüssel, dessen Index jetzt aus s shift 11 Modulo 3 besteht. Am Ende wird das Ergebnis auf V1 addiert.
 \begin{figure}[h]
 \centering
 \includegraphics[scale = 0.55]{XTEA.png}
-\caption{XTEA}
+\caption{XTEA(${\delta}$ ist in dem Fall unser s)}
 \end{figure}
 \newpage
 
@@ -179,9 +222,77 @@ Die Vorgehensweise beide Verfahren haben Gemeinsamkeiten und Unterschiede. Da XT
 
 \newpage
 \subsection*{2.3.Unterschiede und Gemeinsamkeiten zwischen XTEA und Feistelchiffre}
+Die Vorgehensweise beide Verfahren haben Gemeinsamkeiten und Unterschiede. Da XTea auf Feistelchiffre basiert ist, erkennt man auch das symmetrische Verschlüsselungsverfahren bei ihm, d.h. für die Ver- und Entschlüsselung der Nachricht wird denselben Schlüssel verwendet. Bei beidem wird am Anfang der Verschlüsselung die zu verschlüsselnden Daten in zwei Blöcken aufgeteilt und das Verschlüsselungsprozess kann zu mehreren Runden dauern. Die Länge der zu verschlüsselnden Daten muss immer ein Vielfaches der Block-länge sein. Auch das Benutzen von XOR kann man bei beiden Verfahren finden. \\
 Es gibt aber auch Unterschiede zwischen beiden Verfahren. Bei XTea findet jede Runde eine doppelte Verschlüsselung statt, was bei Feistelchiffre nicht zu finden ist. Außerdem gibt es bei XTea eine weitere Variable s und die magische Zahl, die bei der Verschlüsselung eine wichtige Rolle spielen. In XTea wird die XOR Operation öfters ausgeführt und zudem verwendet XTea auch das Shiften. Feistelchiffre arbeitet hingegen mit eine Verschlüsselungsfunktion. Nach jedem Runde der Verschlüsselung werden die Position von den zwei Blöcken getauscht, dies kommt bei XTea allerdings nicht vor. \\
 Zusammengefasst lässt sich sagen, dass sowohl XTea als auch Feistelchiffre die Voraussetzung für symmetrische Verschlüsselung erfüllen. Bei beidem ist die Länge der zu verschlüsselnden Daten ein Vielfaches der Block-länge. Beide Verfahren teilen die Nachricht für die Verschlüsselung in zwei Blöcken auf, dennoch ist die Key-Schedule bei XTea komplexer ist, im Vergleich zu Feistelchiffre.  
-\subsection*{2.4.Padding}
+
+\subsection*{2.4.Verschlüsselung bei Daten die kürzer oder länger als ein Block ist. }
+Für Blockverschlüsselungsalgorithmus wie XTea muss die Länge der zu verschlüsselnden Daten immer ein Vielfaches der Block-länge sein. Es kann aber auch manchmal vorkommen, dass die Länge der zu verschlüsselnden Daten länger oder kürzer als 8 Bytes sind. Genau da wird Padding verwendet. Ein Padding Verfahren, das wir für die Implementierung des Algorithmus verwendet haben ist PKCS\#7. PKCS\#7 steht für “Public Key Cryptography Standard” und ist eine Standard-Padding-Methode, die die Zahl der Padding-bytes bestimmen und diese dann als Wert angibt. Unter PKCS\#7 gibt es auch andere PKCS Verfahren, wie zum Beispiel PKCS\#5, welches für die Passwort basierte Kryptographie verwendet wird. PKCS\#7 hingegen ist für sign and/or Verschlüsselung spezialisiert.  \\
+Das Padding mit PKCS\#7 funktioniert wie folgt. Angenommen bei einer Blocklänge von 8 Bytes verwenden wir das Wort “ASP”, welche eine Länge von 3 Bytes hat. Das Wort entspricht nicht ein Vielfaches der Block-länge und deshalb wird das PKCS\#7 Verfahren für das Padding verwendet. Die ersten drei Bytes des Blocks sind belegt aber es bleiben noch fünf Bytes offen.  
+\begin{table}[H]
+\centering 
+    \begin{tabular}{|l|l|l|l|l|l|l|l|}
+        \hline
+        A & S & P & ? & ? & ? & ? & ?    \\
+        \hline
+    \end{tabular}
+    \caption{Nachricht}
+\end{table}
+
+\begin{table}[H]
+\centering 
+    \begin{tabular}{|l|l|l|l|l|l|l|l|}
+        \hline
+        41 & 53 & 50 & ? & ? & ? & ? & ?    \\
+        \hline
+    \end{tabular}
+    \caption{Nachricht in Hex Code}
+\end{table}
+Bei PKCS\#7 werden die freien Stellen mit Bytes gefüllt, die jeweils die Anzahl der Füllbytes entsprechen. Also werden in diesem Beispiel die Stellen mit 05 gefüllt.  Die Nachricht kann somit verschlüsselt werden.
+\begin{table}[H]
+\centering 
+    \begin{tabular}{|l|l|l|l|l|l|l|l|}
+        \hline
+        41 & 53 & 50 & 05 & 05 & 05 & 05 & 05    \\
+        \hline
+    \end{tabular}
+    \caption{Nachricht in Hex Code mit Padding }
+\end{table}
+
+Was würde passieren, wenn die zu verschlüsselnde Nachricht länger als ein Block entspricht. Als Beispiel schauen wir uns die folgende Nachricht an “Ich liebe ASP”. Diese Nachricht besteht aus 13 Bytes, länger als ein Block. Daher teilen wir die Nachricht in zwei 8 Bytes Block auf. Die Nachricht in Hex Code umgewandelt sieht wie folgt aus: 
+\begin{table}[H]
+\centering 
+    \begin{tabular}{|l|l|l|l|l|l|l|l|}
+        \hline
+        49 & 63 & 68 & 20 & 6C & 69 & 65 & 62    \\
+        \hline
+    \end{tabular}
+    \caption{Block 1: Ich lieb}
+\end{table}
+
+\begin{table}[H]
+\centering 
+    \begin{tabular}{|l|l|l|l|l|l|l|l|}
+        \hline
+         65 & 20 & 41 & 53 & 50 & ?  & ? & ? \\
+        \hline
+    \end{tabular}
+    \caption{Block 2: e ASP}
+\end{table}
+
+Jeder 8 Bytes Block wird unabhängig von anderen Blöcken verschlüsselt. Für den ersten Block können wir ohne Probleme verschlüssel. Beim zweiten Block fehlen uns da 3 Bytes. Deshalb verwende wir die PKCS\#7 Methode aus. Hier werden 3 Bytes gefehlt, also füllen wir es mit 03 aus.
+
+\begin{table}[H]
+\centering 
+    \begin{tabular}{|l|l|l|l|l|l|l|l|}
+        \hline
+         65 & 20 & 41 & 53 & 50 & 03  & 03 & 03 \\
+        \hline
+    \end{tabular}
+    \caption{Block 2: e ASP mit Padding}
+\end{table}
+So kann jetzt Block 2 auch ohne Probleme verschlüsselt werden.\\
+Zusammengefasst lässt sich sagen, wenn die zu verschlüsselden Daten kürzer als ein Block ist, werden zu nächst das Padding angewendet und danach verschlüsselt. Wenn die Daten jedoch länger als ein Block entspricht, werden die Daten in mehrere Blocks aufgeteilt, jeweils 8 Bytes pro Block. Die Blocks werden unabhängig von einander verschlüsselt. Wenn ein Block nicht mit 8 Bytes voll gefüllt wird, wird es zuerst Padding verwendet und dann verschlüsselt.
 
 
 %%test
