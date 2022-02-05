@@ -9,7 +9,7 @@ xtea_encrypt_block:
     mov r8, rdi //blocks
     mov r9, rsi //keys
     xor eax, eax //sum = 0
-.L2:
+.Lfor_begin:
     mov r10d, eax //second sum for sum & 3
     and r10d, 3
     mov edi, DWORD PTR [r9 + r10 * 4] //key[sum&3]
@@ -41,7 +41,7 @@ xtea_encrypt_block:
     add edx, r10d
 
     cmp eax, -1914802624 //sum != 0x9E3779B9 * 64 -1914802624 is the signed 2's complement to sigma * 64
-    jne .L2
+    jne .Lfor_begin
 
     mov DWORD PTR [r8], ecx
     mov DWORD PTR [r8 + 4], edx
@@ -55,7 +55,7 @@ xtea_decrypt_block:
     mov r8, rdi //blocks
     mov r9, rsi //keys
     mov eax, -1914802624 //sum = 0x9E3779B9 * 64 -1914802624 is the signed 2's complement to sigma * 64
-.L6:
+.Lfor_begin2:
     mov r10d, eax //second sum for sum >> 11
     shr r10d, 11
     and r10d, 3
@@ -85,8 +85,8 @@ xtea_decrypt_block:
     xor r10d, edi //(second v1 ^ third v1 + v1) ^ (key[sum & 3] + sum)
     sub ecx, r10d
 
-    test eax, eax //check if eax == 0 (test sets zf to 0 if regDest & regSrc == 0)
-    jne .L6
+    cmp eax, 0
+    jne .Lfor_begin2
 
     mov DWORD PTR [r8], ecx
     mov DWORD PTR [r8 + 4], edx
