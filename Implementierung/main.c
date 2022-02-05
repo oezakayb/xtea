@@ -19,15 +19,15 @@ const char* help_msg =
         "\n"
         "Optional arguments:\n"
         "  -V X   Runs the chosen version of implementation\n"
-        "       V0: Our Assembly implementation (default)\n"
+        "       V0: Our Assembler implementation (default)\n"
         "       V1: Our C implementation\n"
         "       V2: Our C implementation with precalculated sum values\n"
-        "       V3: Reference C code of Needham and Wheeler\n"
+        "       V3: Reference C implementation of Needham and Wheeler\n"
         "  -B X   The program will run for X times and the total runtime of the given version of implementation will be measured\n"
-        "       and printed (default: X = 1)\n"
+        "       and printed\n"
         "  -k X   A 128-bit integer key for encrypting and decrypting\n"
         "  -i X   The initialization vector (32-bit integer)\n"
-        "  -o X   The output file\n"
+        "  -o X   The output file (default: output.txt)\n"
         "  -h / --help   Show help message (this text) and exit\n";
 
 void print_usage(const char* progname) {
@@ -55,6 +55,7 @@ int main(int argc, char** argv) {
     int b;
     bool bbool = false;
     bool d = false;
+    //keys = aspa spas pasp aspa
     uint32_t keys[4] = {0X61737061,
                         0X73706173,
                         0X70617370,
@@ -62,9 +63,9 @@ int main(int argc, char** argv) {
     uint32_t initVec = 0;
     FILE *output = NULL;
 
-    unsigned long sums [64];
-
-    for (int i = 0; i < 64; ++i) {
+    //precalculate sums for V2
+    unsigned long sums [65];
+    for (int i = 0; i < 65; ++i) {
         sums[i] = i * 0x9E3779B9;
     }
 
@@ -139,49 +140,38 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    unsigned int blockCount = valueLen / 8;
-    uint8_t padBytes = (-valueLen) & 7;
+    unsigned int blockCount = valueLen / 8; //size of blocks with no pad
+    uint8_t padBytes = (-valueLen) & 7; //size of padding bytes
 
     if(padBytes != 0) {
-        uint8_t valueTemp[valueLen + padBytes + 1];
+        uint8_t* valueTemp = malloc(sizeof(*valueTemp) * (valueLen + padBytes + 1));
         valueTemp[valueLen + padBytes] = '\0';
         strncpy(valueTemp, value, valueLen);
         free(value);
 
         for (int i = valueLen; i < valueLen + padBytes; ++i) {
-            valueTemp[i] = padBytes;
+            valueTemp[i] = padBytes; //pad the block with PKCS#7
         }
-
 
         value = malloc(sizeof(*value) * (valueLen + padBytes + 1));
         strncpy(value, valueTemp, valueLen + padBytes + 1);
+        free(valueTemp);
         blockCount++;
     }
 
-    printf("%s\n", (char*)value);
-
-
-    printf("%d\n", blockCount);
-    printf("%d\n", padBytes);
-
-    uint32_t values[blockCount][2];
+    uint32_t values[blockCount][2]; //2d array for all 2 * 4 blocks
 
     for (int k = 0; k < blockCount; ++k) {
-        for (int i = 0; i < 2; ++i) {
+        for (int i = 0; i < 2; ++i) { //parse the chars to uint32_t
             uint8_t tempChar[4];
             strncpy(tempChar, &value[k * 8 + i * 4], 4);
-            uint32_t tempInt32 [4] = {tempChar[0], tempChar[1], tempChar[2], tempChar[3]};
+            uint32_t tempInt32 [4] = {tempChar[0], tempChar[1], tempChar[2], tempChar[3]}; //assign 8-bit int to 32-bit for shifting
 
             values[k][i] = (tempInt32[0] << 24) | (tempInt32[1] << 16) | (tempInt32[2] << 8) | (tempInt32[3]);
-            printf("%X\n", values[k][i]);
         }
     }
 
-    if(padBytes == 0)
-    {
-        free(value);
-    }
-
+    free(value);
 
     if(output == NULL){
         output = fopen("output.txt", "w");
@@ -189,12 +179,14 @@ int main(int argc, char** argv) {
 
     uint8_t* outputStr = malloc(sizeof(*outputStr) * (valueLen + padBytes + 1));
     outputStr[valueLen + padBytes] = '\0';
-    uint8_t* charCounter = outputStr;
+    uint8_t* charCounter = outputStr; //second pointer for concatting to outputStr but also not lose the array begin
 
     switch(bbool){
         case true:
         {clock_t t = clock();
             for (int i = 0; i < b; ++i) {
+                charCounter = outputStr; //when run multiple times the string will be concatted to the end multiple times
+                                        //by assigning ptr of outputStr to charCounter this won't happen
                 for (int j = 0; j < blockCount; ++j) {
                     define_version(v, d, sums, values[j], keys);
 
@@ -215,7 +207,12 @@ int main(int argc, char** argv) {
             t = clock() - t;
             double time_taken = ((double)t)/CLOCKS_PER_SEC;
 
-            printf("It took %f seconds to encrypt %i times.\n", time_taken, b);
+            if(d == false){
+                printf("It took %f seconds to encrypt %i times.\n", time_taken, b);
+            }else{
+                printf("It took %f seconds to decrypt %i times.\n", time_taken, b);
+            }
+
             break;
         }
 
@@ -238,6 +235,16 @@ int main(int argc, char** argv) {
     }
 
     if(d == true && (outputStr[strlen(outputStr) - 2] < 8 && outputStr[strlen(outputStr) - 2] > 0)){
+        //if there should be a padding while encrypting obviously the padding bytes also get encrypted. when decrypted
+        //chars corresponding to padding size will be displayed. to prevent this, we tried to strip the padding when
+        //the encrypted message is written to output file. however, if the encrypted message without the padding bytes
+        //is decrypted, the program pads the message with unencrypted padding bytes which causes the last block to get
+        //incorrectly decrypted. our solution was not stripping the padding bytes and after decryption of the message
+        // with padding bytes searching for a sequence of the same bytes -which are between 0 and 8 both
+        // exclusive- that starts from the end to the 7th from the end byte and strip it. although it's theoretically
+        //incorrect, since the message itself can include a sequence of the same aforementioned bytes at the end,
+        //practically this cannot be the case for human-written messages, because not all machines can print those chars
+
         uint8_t counter = 0;
         size_t outputLen = strlen(outputStr);
         uint8_t lastChar = outputStr[outputLen - 1];
@@ -258,6 +265,7 @@ int main(int argc, char** argv) {
         strncpy(outputTemp, &outputStr[0], valueLen - counter);
         free(outputStr);
         outputStr = outputTemp;
+        free(outputTemp);
     }
 
     fwrite(outputStr, sizeof(*outputStr), strlen(outputStr), output);

@@ -19,9 +19,6 @@ void define_version(int version, bool d, unsigned long sums [64], uint32_t block
 
         case 3:{
 
-            long v [2] = {(long)blocks[0], (long)blocks[1]};
-            long k [4] = {(long)keys[0], (long)keys[1], (long)keys[2], (long)keys[3]};
-
             if(d == true){
                 xtea_v3(blocks, keys, -64);
             }else{
