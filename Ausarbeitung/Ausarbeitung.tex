@@ -160,7 +160,7 @@ Anschließend follgt das Shiften von V2 und die XOR Operation wird danach an den
 \centering
     \begin{tabular}{|l|l|l|l|}
         \hline
-        02 & CB & 0F & 66    \\
+        06 & 16 & 1E & EA    \\
         \hline
     \end{tabular}
     \caption{(V2 << 4) $\oplus$ (V2 >> 5)}
@@ -170,7 +170,7 @@ Das Ergebnis wird mit V2 addiert. Als nächstes wird die XOR Operation, zwischen
 \centering
     \begin{tabular}{|l|l|l|l|}
         \hline
-        53 & 14 & 54 & B2    \\
+        56 & 5F & 64 & 36    \\
         \hline
     \end{tabular}
     \caption{((V2 << 4) $\oplus$ (V2 >> 5)) + V2}
@@ -190,7 +190,7 @@ Das Ergebnis wird mit V2 addiert. Als nächstes wird die XOR Operation, zwischen
 \centering
     \begin{tabular}{|l|l|l|l|}
         \hline
-        12 & 47 & 04 & F3    \\
+        17 & 0C & 34 & 77    \\
         \hline
     \end{tabular}
     \caption{(((V2 << 4) $\oplus$ (V2 >> 5)) + V2) $\oplus$ (s + K[s\& 3])}
@@ -201,7 +201,7 @@ Zum Schluss wird das Ergebnis zu V1 addiert.
 \centering
     \begin{tabular}{|l|l|l|l|}
         \hline
-        54 & 8C & 4E & 46    \\
+        59 & 51 & 7D & CA    \\
         \hline
     \end{tabular}
     \caption{((((V2 << 4) $\oplus$ (V2 >> 5)) + V2) $\oplus$ (s + K[s\& 3])) + V1}
