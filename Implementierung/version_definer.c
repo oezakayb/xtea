@@ -1,6 +1,6 @@
 #include "version_definer.h"
 
-void define_version(int version, bool d, unsigned long sums [64], uint32_t blocks[2], const uint32_t keys[4]){
+void define_version(int version, bool d, unsigned long sums [65], uint32_t blocks[2], const uint32_t keys[4]){
     switch(version){
         case 1:
             if(d == true){
@@ -19,9 +19,9 @@ void define_version(int version, bool d, unsigned long sums [64], uint32_t block
 
         case 3:
             if(d == true){
-                xtea_decrypt_block_v3(blocks, keys);
+                xtea_decrypt_block_v3(sums, blocks, keys);
             }else{
-                xtea_encrypt_block_v3(blocks, keys);
+                xtea_encrypt_block_v3(sums, blocks, keys);
             }break;
 
 
