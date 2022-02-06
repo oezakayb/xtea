@@ -41,7 +41,6 @@ void print_help(const char* progname) {
     fprintf(stderr, "\n%s", help_msg);
 }
 
-
 int main(int argc, char** argv) {
 
     const char* progname = argv[0];
@@ -76,7 +75,7 @@ int main(int argc, char** argv) {
             {0,         0,                 0,  0 }
     };
 
-    while((opt = getopt_long(argc, argv, "V:B:k:i:o:dhhelp", long_options, 0)) != -1) {
+    while((opt = getopt_long(argc, argv, "V:B:k:i:o:dh", long_options, 0)) != -1) {
         switch (opt) {
             case 'V':
                 v = atoi(optarg);
@@ -99,7 +98,7 @@ int main(int argc, char** argv) {
             case 'i':
                 initVec = atoi(optarg);
                 for(int i = 0; i < 4; i++){
-                    keys[i] = (keys[i] & initVec + initVec) & 0xFFFFFFFF;
+                    keys[i] = ((keys[i] & initVec) + initVec) & 0xFFFFFFFF;
                 }
                 break;
             case 'o':
@@ -113,9 +112,9 @@ int main(int argc, char** argv) {
             case 'h':
                 print_help(progname);
                 return EXIT_SUCCESS;
-            case 'help':
+            /*case 'help':
                 print_help(progname);
-                return EXIT_SUCCESS;
+                return EXIT_SUCCESS;*/
             default:
                 print_usage(progname);
                 return EXIT_FAILURE;
@@ -258,7 +257,7 @@ int main(int argc, char** argv) {
         case false:
             for (int i = 0; i < blockCount; ++i) {
                 define_version(v, d, sums, values[i], keys);
-                printf("%X\n%X\n", values[i][0], values[i][1]);
+
                 for (int k = 0; k < 2; ++k) {
                     uint8_t tempChar[5];
                     tempChar[4] = '\n';
@@ -269,6 +268,10 @@ int main(int argc, char** argv) {
                     strncpy(charCounter, &tempChar[0], 4);
                     charCounter += 4;
                 }
+
+                printf("%s\n%X\n%X\n", "This is the hexadecimal values of the 2 * 4 byte blocks of input, a bug messes up the padding bytes if the blocks are not printed so you can just ignore it",
+                       values[i][0], values[i][1]); //somehow the padding bytes get messed if the values are not printed
+                //so we will leave it here although it was not part of the Aufgabenstellung
 
             }
             break;
@@ -320,4 +323,3 @@ int main(int argc, char** argv) {
 
     return EXIT_SUCCESS;
 }
-
