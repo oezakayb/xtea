@@ -3,9 +3,9 @@
 \graphicspath{{./Bilder/}}
 
 \newcommand{\theGroup}{team 117} % Beispiel: 42
-\newcommand{\theNumber}{502: XTEA} 
+\newcommand{\theNumber}{502: XTEA}
 \author{Guo, Linfeng\\Gönenc, Hazar \\Özakay, Baris}
-\date{Wintersemester 2021/22} 
+\date{Wintersemester 2021/22}
 
 
 % Diese Zeile bitte -nicht- aendern.
@@ -17,7 +17,7 @@
 
 
 \section{Einleitung}
-Im Rahmen unseres Projektes im Fach Aspekte der systemnahen Programmierung bei der Spieleentwicklung war es unsere Aufgabe, ein Ver- und Entschlüsselungsalgorithmus XTea in Assemblercode zu programmieren. Diese Aufgabe lässt sich in folgende Bereiche aufteilen: Konzeption, die Funktionsweise des XTEA Algorithmus und Verfahren für die Optimierung des Algorithmus, verstehen; der XTEA Algorithmus in Assemblercode zu implementieren …(Aufgabe von Baris). Die Bearbeitung dieser Teilbereiche wird im Folgenden Beschrieben.  \\In der Grafik zu sehen ist ein Beispiel für die Ver- und Entschlüsselung mit dem XTEA Algorithmus.  
+Im Rahmen unseres Projektes im Fach Aspekte der systemnahen Programmierung bei der Spieleentwicklung war es unsere Aufgabe, ein Ver- und Entschlüsselungsalgorithmus XTea in Assemblercode zu programmieren. Diese Aufgabe lässt sich in folgende Bereiche aufteilen: Konzeption, die Funktionsweise des XTEA Algorithmus und Verfahren für die Optimierung des Algorithmus, verstehen; der XTEA Algorithmus in Assemblercode zu implementieren …(Aufgabe von Baris). Die Bearbeitung dieser Teilbereiche wird im Folgenden Beschrieben.  \\In der Grafik zu sehen ist ein Beispiel für die Ver- und Entschlüsselung mit dem XTEA Algorithmus.
 
 \newpage
 \section{Lösungsansatz}
@@ -26,7 +26,7 @@ Der XTEA Algorithmus ist ein Ver -und Entschlüsselungsalgorithmus, welche auf d
 Feistelchiffre lässt sich in vier Schritten aufteilen. Zuerst hat man ein Klartextblock mit der Nachricht, weche meist 8 Bytes ist, und teilt diese in zwei gleich große Bl\"ocke L0 und R0, die 4 Bytes entsprechen auf.
 
 \begin{table}[H]
-\centering 
+\centering
     \begin{tabular}{|l|l|l|l|l|l|l|l|}
         \hline
         B & E & I & S & P & I & E & L   \\
@@ -36,10 +36,10 @@ Feistelchiffre lässt sich in vier Schritten aufteilen. Zuerst hat man ein Klart
 \end{table}
 
 \begin{table}[H]
-\centering 
+\centering
     \begin{tabular}{|l|l|l|l|l|l|l|l|}
         \hline
-        42 & 45 & 49 & 53 & 50 & 49 & 25 & 4C   \\
+        42 & 45 & 49 & 53 & 50 & 49 & 45 & 4C   \\
         \hline
     \end{tabular}
     \caption{Nachricht in Hex Code}
@@ -48,9 +48,9 @@ Feistelchiffre lässt sich in vier Schritten aufteilen. Zuerst hat man ein Klart
 
 
 \begin{table}[H]
-    
+
     \begin{minipage}{.5\linewidth}
-      
+
       \centering
         \begin{tabular}{|l|l|l|l|}
 		\hline
@@ -61,19 +61,19 @@ Feistelchiffre lässt sich in vier Schritten aufteilen. Zuerst hat man ein Klart
 	\caption{L0}
     \end{minipage}%
     \begin{minipage}{.5\linewidth}
-    
+
  \centering
-        
+
         \begin{tabular}{|l|l|l|l|}
            \hline
-		 50 & 49 & 25 & 4C   \\
+		 50 & 49 & 45 & 4C   \\
 		\hline
         \end{tabular}
-\caption{R0} 
+\caption{R0}
     \end{minipage}
 \end{table}
 Danach findet die eigentliche Verschlüsselung statt. Man führt die Verschlüsselungsfunktion mit der Schlüssel,der ebenfalls 4 Byte entspricht, auf R0 aus. Die Funktion bei Feistelchiffre ist allerdings undefiniert, da Feistelchiffre nur die Struktur anbietet. Der Wert der durch die Funktion ergibt, wird anschließend mit dem linken Teil durch die XOR- Operation eingefangen. So ergibt sich das neue R1. Die ursprüngliche R0 wird dann zu L1. Nach jeder Verschlüsselung wird die Position vom linken und dem rechten Block getauscht, sowie oben beschrieben wird.\\
-Die Entschlüsselung funktioniert im Prinzip genau wie die Verschlüsselung. Nur mit dem Unterschied, dass man die Position vom linken und rechten Teil tauscht. Also wird Ln+1 in die Funktion mit demselben Key eingesetzt und das Ergebnis wird dann mit Rn+1 per XOR abgebildet. Der Wert wird dann zu Rn und Ln+1 wird zu Ln.  
+Die Entschlüsselung funktioniert im Prinzip genau wie die Verschlüsselung. Nur mit dem Unterschied, dass man die Position vom linken und rechten Teil tauscht. Also wird Ln+1 in die Funktion mit demselben Key eingesetzt und das Ergebnis wird dann mit Rn+1 per XOR abgebildet. Der Wert wird dann zu Rn und Ln+1 wird zu Ln.
 
 \begin{figure}[h]
 \centering
@@ -91,11 +91,11 @@ Das Verfahren von XTea ist auf Feistelchiffre basiert. Der eingelesene Wert, wel
 \end{equation}
 berechnen. Jede Runde findet eine doppelte Verschlüsselung statt. \\
 Zuerst ist die Verschlüsselung von V1. Da wird V2 in zwei Blöcken geshiftet, bitweiser Shift. Block 1: V2 << 4 und Block: V2 >>5. Die zwei Blöcken werden per XOR zu einem neuen Ergebnis abgebildet und mit V2 addiert. Danach wird das Ergebnis mit der Summe von s, welche am Anfang Null ist, und der Schlüssel, dessen Index aus der Variable s Modulo drei ergibt, per XOR abgebildet. Zum Schluss wird das Ergebnis auf V1 addiert. \\
-Zur veranschaulichung nehmen wir wieder das Beispielwort "BEISPIEL", in Hex Code. Und teilen dieses Wort in V1 und V2 auf.  
+Zur veranschaulichung nehmen wir wieder das Beispielwort "BEISPIEL", in Hex Code. Und teilen dieses Wort in V1 und V2 auf.
 \begin{table}[H]
-    
+
     \begin{minipage}{.5\linewidth}
-      
+
       \centering
         \begin{tabular}{|l|l|l|l|}
 		\hline
@@ -106,20 +106,20 @@ Zur veranschaulichung nehmen wir wieder das Beispielwort "BEISPIEL", in Hex Code
 	\caption{V1}
     \end{minipage}%
     \begin{minipage}{.5\linewidth}
-    
+
  \centering
-        
+
         \begin{tabular}{|l|l|l|l|}
            \hline
-		 50 & 49 & 25 & 4C   \\
+		 50 & 49 & 45 & 4C   \\
 		\hline
         \end{tabular}
-\caption{V2} 
+\caption{V2}
     \end{minipage}
 \end{table}
 
 \begin{table}[H]
-\centering 
+\centering
     \begin{tabular}{|l|l|l|l||l|l|l|l||l|l|l|l||l|l|l|l|}
         \hline
         41 & 53 & 50 & 41 & 53 & 50 & 41 & 53  & 50 & 41 & 53 & 50 & 41 & 53 & 50 & 41 \\
@@ -128,56 +128,56 @@ Zur veranschaulichung nehmen wir wieder das Beispielwort "BEISPIEL", in Hex Code
     \caption{Key}
 \end{table}
 
- 
+
 Anschließend follgt das Shiften von V2 und die XOR Operation wird danach an den beiden Blöcken ausgeführt.
 \begin{table}[H]
-    
+
     \begin{minipage}{.5\linewidth}
-      
+
       \centering
         \begin{tabular}{|l|l|l|l|}
 		\hline
-            04 & 92 & 54 & C0   \\
+            04 & 94 & 54 & C0   \\
 		\hline
         \end{tabular}
 
 	\caption{V2 << 4}
     \end{minipage}%
     \begin{minipage}{.5\linewidth}
-    
+
  \centering
-        
+
         \begin{tabular}{|l|l|l|l|}
            \hline
-		 02 & 82 & 49 & 2A   \\
+		 02 & 82 & 4A & 2A   \\
 		\hline
         \end{tabular}
-\caption{V2 >> 5} 
+\caption{V2 >> 5}
     \end{minipage}
 \end{table}
 
 \begin{table}[H]
-\centering 
+\centering
     \begin{tabular}{|l|l|l|l|}
         \hline
-        06 & 10 & 1D & EA    \\
+        02 & CB & 0F & 66    \\
         \hline
     \end{tabular}
     \caption{(V2 << 4) $\oplus$ (V2 >> 5)}
 \end{table}
-Das Ergebnis wird mit V2 addiert. Als nächstes wird die XOR Operation, zwischen dem Ergebnis und der Summe von s und Key, ausgeführt. Da bei der ersten Runde s immer Null ist, wird immer K[0] genommen. 
+Das Ergebnis wird mit V2 addiert. Als nächstes wird die XOR Operation, zwischen dem Ergebnis und der Summe von s und Key, ausgeführt. Da bei der ersten Runde s immer Null ist, wird immer K[0] genommen.
 \begin{table}[H]
-\centering 
+\centering
     \begin{tabular}{|l|l|l|l|}
         \hline
-        56 & 59 & 43 & 36    \\
+        53 & 14 & 54 & B2    \\
         \hline
     \end{tabular}
     \caption{((V2 << 4) $\oplus$ (V2 >> 5)) + V2}
 \end{table}
 
 \begin{table}[H]
-\centering 
+\centering
     \begin{tabular}{|l|l|l|l|}
         \hline
         41 & 53 & 50 & 41    \\
@@ -187,10 +187,10 @@ Das Ergebnis wird mit V2 addiert. Als nächstes wird die XOR Operation, zwischen
 \end{table}
 
 \begin{table}[H]
-\centering 
+\centering
     \begin{tabular}{|l|l|l|l|}
         \hline
-        17 & 0A & 13 & 77    \\
+        12 & 47 & 04 & F3    \\
         \hline
     \end{tabular}
     \caption{(((V2 << 4) $\oplus$ (V2 >> 5)) + V2) $\oplus$ (s + K[s\& 3])}
@@ -198,10 +198,10 @@ Das Ergebnis wird mit V2 addiert. Als nächstes wird die XOR Operation, zwischen
 Zum Schluss wird das Ergebnis zu V1 addiert.
 
 \begin{table}[H]
-\centering 
+\centering
     \begin{tabular}{|l|l|l|l|}
         \hline
-        59 & 4F & 5C & CA    \\
+        54 & 8C & 4E & 46    \\
         \hline
     \end{tabular}
     \caption{((((V2 << 4) $\oplus$ (V2 >> 5)) + V2) $\oplus$ (s + K[s\& 3])) + V1}
@@ -209,7 +209,7 @@ Zum Schluss wird das Ergebnis zu V1 addiert.
 
 
 
-Die Variable s wird jetzt um die magische Zahl erhöht. Für V2 funktioniert die Verschlüsselung ähnlich wie bei V1. Wir teilen V1 in zwei Blöcken durch das Shiften auf und genau sowie bei V1, werden die zwei Blöcken per XOR zu einem neuen Ergebnis dargestellt und mit V1 addiert. Das Ergebnis verschlüsselt sich dann per XOR mit der Summe von s und der Schlüssel, dessen Index jetzt aus s shift 11 Modulo 3 besteht. Am Ende wird das Ergebnis auf V1 addiert.
+Die Variable s wird jetzt um die magische Zahl erhöht. Für V2 funktioniert die Verschlüsselung ähnlich wie bei V1. Wir teilen V1 in zwei Blöcken durch das Shiften auf und genau sowie bei der Verschlüsselung von V1, werden die zwei Blöcken per XOR zu einem neuen Ergebnis dargestellt und mit V1 addiert. Das Ergebnis verschlüsselt sich dann per XOR mit der Summe von s und der Schlüssel, dessen Index jetzt aus s shift 11 Modulo 3 besteht. Am Ende wird das Ergebnis auf V1 addiert.
 \begin{figure}[h]
 \centering
 \includegraphics[scale = 0.55]{XTEA.png}
@@ -224,13 +224,13 @@ Die Variable s wird jetzt um die magische Zahl erhöht. Für V2 funktioniert die
 \subsection*{2.3.Unterschiede und Gemeinsamkeiten zwischen XTEA und Feistelchiffre}
 Die Vorgehensweise beide Verfahren haben Gemeinsamkeiten und Unterschiede. Da XTea auf Feistelchiffre basiert ist, erkennt man auch das symmetrische Verschlüsselungsverfahren bei ihm, d.h. für die Ver- und Entschlüsselung der Nachricht wird denselben Schlüssel verwendet. Bei beidem wird am Anfang der Verschlüsselung die zu verschlüsselnden Daten in zwei Blöcken aufgeteilt und das Verschlüsselungsprozess kann zu mehreren Runden dauern. Die Länge der zu verschlüsselnden Daten muss immer ein Vielfaches der Block-länge sein. Auch das Benutzen von XOR kann man bei beiden Verfahren finden. \\
 Es gibt aber auch Unterschiede zwischen beiden Verfahren. Bei XTea findet jede Runde eine doppelte Verschlüsselung statt, was bei Feistelchiffre nicht zu finden ist. Außerdem gibt es bei XTea eine weitere Variable s und die magische Zahl, die bei der Verschlüsselung eine wichtige Rolle spielen. In XTea wird die XOR Operation öfters ausgeführt und zudem verwendet XTea auch das Shiften. Feistelchiffre arbeitet hingegen mit eine Verschlüsselungsfunktion. Nach jedem Runde der Verschlüsselung werden die Position von den zwei Blöcken getauscht, dies kommt bei XTea allerdings nicht vor. \\
-Zusammengefasst lässt sich sagen, dass sowohl XTea als auch Feistelchiffre die Voraussetzung für symmetrische Verschlüsselung erfüllen. Bei beidem ist die Länge der zu verschlüsselnden Daten ein Vielfaches der Block-länge. Beide Verfahren teilen die Nachricht für die Verschlüsselung in zwei Blöcken auf, dennoch ist die Key-Schedule bei XTea komplexer ist, im Vergleich zu Feistelchiffre.  
+Zusammengefasst lässt sich sagen, dass sowohl XTea als auch Feistelchiffre die Voraussetzung für symmetrische Verschlüsselung erfüllen. Bei beidem ist die Länge der zu verschlüsselnden Daten ein Vielfaches der Block-länge. Beide Verfahren teilen die Nachricht für die Verschlüsselung in zwei Blöcken auf, dennoch ist die Key-Schedule bei XTea komplexer ist, im Vergleich zu Feistelchiffre.
 
 \subsection*{2.4.Verschlüsselung bei Daten die kürzer oder länger als ein Block ist. }
 Für Blockverschlüsselungsalgorithmus wie XTea muss die Länge der zu verschlüsselnden Daten immer ein Vielfaches der Block-länge sein. Es kann aber auch manchmal vorkommen, dass die Länge der zu verschlüsselnden Daten länger oder kürzer als 8 Bytes sind. Genau da wird Padding verwendet. Ein Padding Verfahren, das wir für die Implementierung des Algorithmus verwendet haben ist PKCS\#7. PKCS\#7 steht für “Public Key Cryptography Standard” und ist eine Standard-Padding-Methode, die die Zahl der Padding-bytes bestimmen und diese dann als Wert angibt. Unter PKCS\#7 gibt es auch andere PKCS Verfahren, wie zum Beispiel PKCS\#5, welches für die Passwort basierte Kryptographie verwendet wird. PKCS\#7 hingegen ist für sign and/or Verschlüsselung spezialisiert.  \\
-Das Padding mit PKCS\#7 funktioniert wie folgt. Angenommen bei einer Blocklänge von 8 Bytes verwenden wir das Wort “ASP”, welche eine Länge von 3 Bytes hat. Das Wort entspricht nicht ein Vielfaches der Block-länge und deshalb wird das PKCS\#7 Verfahren für das Padding verwendet. Die ersten drei Bytes des Blocks sind belegt aber es bleiben noch fünf Bytes offen.  
+Das Padding mit PKCS\#7 funktioniert wie folgt. Angenommen bei einer Blocklänge von 8 Bytes verwenden wir das Wort “ASP”, welche eine Länge von 3 Bytes hat. Das Wort entspricht nicht ein Vielfaches der Block-länge und deshalb wird das PKCS\#7 Verfahren für das Padding verwendet. Die ersten drei Bytes des Blocks sind belegt aber es bleiben noch fünf Bytes offen.
 \begin{table}[H]
-\centering 
+\centering
     \begin{tabular}{|l|l|l|l|l|l|l|l|}
         \hline
         A & S & P & ? & ? & ? & ? & ?    \\
@@ -240,7 +240,7 @@ Das Padding mit PKCS\#7 funktioniert wie folgt. Angenommen bei einer Blocklänge
 \end{table}
 
 \begin{table}[H]
-\centering 
+\centering
     \begin{tabular}{|l|l|l|l|l|l|l|l|}
         \hline
         41 & 53 & 50 & ? & ? & ? & ? & ?    \\
@@ -250,7 +250,7 @@ Das Padding mit PKCS\#7 funktioniert wie folgt. Angenommen bei einer Blocklänge
 \end{table}
 Bei PKCS\#7 werden die freien Stellen mit Bytes gefüllt, die jeweils die Anzahl der Füllbytes entsprechen. Also werden in diesem Beispiel die Stellen mit 05 gefüllt.  Die Nachricht kann somit verschlüsselt werden.
 \begin{table}[H]
-\centering 
+\centering
     \begin{tabular}{|l|l|l|l|l|l|l|l|}
         \hline
         41 & 53 & 50 & 05 & 05 & 05 & 05 & 05    \\
@@ -259,9 +259,9 @@ Bei PKCS\#7 werden die freien Stellen mit Bytes gefüllt, die jeweils die Anzahl
     \caption{Nachricht in Hex Code mit Padding }
 \end{table}
 
-Was würde passieren, wenn die zu verschlüsselnde Nachricht länger als ein Block entspricht. Als Beispiel schauen wir uns die folgende Nachricht an “Ich liebe ASP”. Diese Nachricht besteht aus 13 Bytes, länger als ein Block. Daher teilen wir die Nachricht in zwei 8 Bytes Block auf. Die Nachricht in Hex Code umgewandelt sieht wie folgt aus: 
+Was würde passieren, wenn die zu verschlüsselnde Nachricht länger als ein Block entspricht. Als Beispiel schauen wir uns die folgende Nachricht an “Ich liebe ASP”. Diese Nachricht besteht aus 13 Bytes, länger als ein Block. Daher teilen wir die Nachricht in zwei 8 Bytes Block auf. Die Nachricht in Hex Code umgewandelt sieht wie folgt aus:
 \begin{table}[H]
-\centering 
+\centering
     \begin{tabular}{|l|l|l|l|l|l|l|l|}
         \hline
         49 & 63 & 68 & 20 & 6C & 69 & 65 & 62    \\
@@ -271,7 +271,7 @@ Was würde passieren, wenn die zu verschlüsselnde Nachricht länger als ein Blo
 \end{table}
 
 \begin{table}[H]
-\centering 
+\centering
     \begin{tabular}{|l|l|l|l|l|l|l|l|}
         \hline
          65 & 20 & 41 & 53 & 50 & ?  & ? & ? \\
@@ -283,7 +283,7 @@ Was würde passieren, wenn die zu verschlüsselnde Nachricht länger als ein Blo
 Jeder 8 Bytes Block wird unabhängig von anderen Blöcken verschlüsselt. Für den ersten Block können wir ohne Probleme verschlüssel. Beim zweiten Block fehlen uns da 3 Bytes. Deshalb verwende wir die PKCS\#7 Methode aus. Hier werden 3 Bytes gefehlt, also füllen wir es mit 03 aus.
 
 \begin{table}[H]
-\centering 
+\centering
     \begin{tabular}{|l|l|l|l|l|l|l|l|}
         \hline
          65 & 20 & 41 & 53 & 50 & 03  & 03 & 03 \\
@@ -292,7 +292,7 @@ Jeder 8 Bytes Block wird unabhängig von anderen Blöcken verschlüsselt. Für d
     \caption{Block 2: e ASP mit Padding}
 \end{table}
 So kann jetzt Block 2 auch ohne Probleme verschlüsselt werden.\\
-Zusammengefasst lässt sich sagen, wenn die zu verschlüsselden Daten kürzer als ein Block ist, werden zu nächst das Padding angewendet und danach verschlüsselt. Wenn die Daten jedoch länger als ein Block entspricht, werden die Daten in mehrere Blocks aufgeteilt, jeweils 8 Bytes pro Block. Die Blocks werden unabhängig von einander verschlüsselt. Wenn ein Block nicht mit 8 Bytes voll gefüllt wird, wird es zuerst Padding verwendet und dann verschlüsselt.~\cite{WhatIsPKCS7}
+Zusammengefasst lässt sich sagen, wenn die zu verschlüsselden Daten kürzer als ein Block ist, werden zu nächst das Padding angewendet und danach verschlüsselt. Wenn die Daten jedoch länger als ein Block entspricht, werden die Daten in mehrere Blocks aufgeteilt, jeweils 8 Bytes pro Block. Die Blocks werden unabhängig von einander verschlüsselt. Wenn ein Block nicht mit 8 Bytes voll gefüllt wird, wird es zuerst Padding verwendet und dann verschlüsselt.
 
 
 %%test
@@ -305,44 +305,25 @@ Zusammengefasst lässt sich sagen, wenn die zu verschlüsselden Daten kürzer al
 \newpage
 
 \section{Performanzanalyse}
-Um die Performanz unserer Algorithmus zu analysieren, haben wir insgesamt 6 verschiedene Varianten der Algorithmus programmiert und jeden (1000, 5000, 10 000, 50 000, 100 000, 500 000, 1 000 000, 5 000 000, 10 000 000, 50 000 000, 100 000 000, 500 000 000, 1 000 000 000)- mal laufen gelassen und die Ergebnisse, bezeihungsweise nach wie vielen Sekunden das Programm terminiert hat, gemessen. Für das Messen der Werte haben wir die clock()-Funktion, die die clock-tickts zur Aufrufzeit zurückgibt, und das macro CLOCKS\_PER\_SEC der Libarary time.h benutzt. Die verschiedene Varianten lauten:
+Um die Performanz unserer Algorithmus zu analysieren, haben wir insgesamt 6 verschiedene Varianten der Algorithmus programmiert und jeden (1000, 5000, 10 000, 50 000, 100 000, 500 000, 1 000 000, 5 000 000, 10 000 000, 50 000 000, 100 000 000, 500 000 000, 1 000 000 000)- mal laufen gelassen und die Ergebnisse, bezeihungsweise nach wie vielen Sekunden das Programm terminiert hat, gemessen. Für das Messen der Werte haben wir die clock()-Funktion, die die clock-tickts zur Aufrufzeit zurückgibt, und das macro CLOCKS\_PER\_SEC der Libarary time.h benutzt. Alle Varianten wurden auf einem System mit Intel Xeon E5-2687W v3 Prozessor @3.10 GHz, 512 GB Arbeitsspeicher, Ubuntu 20.04.1, 64 Bit und Linux-Kernel 5.13.0. ausgeführt. Die verschiedene Varianten lauten:
 \begin{itemize}
-\item Unsere Assemblerimplementierung 
+\item Unsere Assemblerimplementierung
 \item Unsere C- Implementierung ohne Compileroptimierung
 \item Unsere C- Implementierung mit Compileroptimierung O2
 \item Unsere C- Implementierung mit vorgerechneten s- Werte und ohne Compileroptimisierung
-\item Unsere C- Implementierung mit vorgerechneten s- Werte und mit Compileroptimisierung O2
+\item Assemblerimplementierung unserer C-Implementierung, die durch godbolt.com mit gcc 11.2 und Intirinsicsoptimisierung -O2 compiliert wurde
 \item C-Implementierung von Needham and Wheeler ohne Compileroptimisierung (Die Datentypen der Variablen values und keys wurden wegen technischen Gründen von long zu uint32\_t verändert).
 \end{itemize}
 Die gemessene Werte sind auf den untensthenden graphische Darstellungen zu finden. Obwohl der Liniengraph bei den größeren Rundenanzahlen eine bessere Hinsicht der Unterschiede gibt, kann man die kleinere Werte gar nicht unterscheiden. Deshalb steht daneben eine Tabelle, auf der alle gemessene Werte stehen.\\
 Beim Implementieren der Assembler-Variante ohne den vorgerechneten s-Werte war das Ziel den Speicher möglichst wenig
-zuzugreifen und die Stackallokationen möglichst viel zu vermeiden. Der Speicher wird ganz am Anfang für die 
-Zuweisung der zu ver-/entschlüsselnden Datenwörter bzw. ganz am Ende rückwärtig zugegriffen und vor jeder 
-jump-Instruktion (für die for-Schleife) 2-mal um den Schlüssel auszulesen. Kein Block des Stacks wird durch 
-die effiziente Ausnutzung aller Caller-saved Registern alloziiert. Unserer Behauptung nach ist das, der Grund der 
+zuzugreifen und die Stackallokationen möglichst viel zu vermeiden. Der Speicher wird ganz am Anfang für die
+Zuweisung der zu ver-/entschlüsselnden Datenwörter bzw. ganz am Ende rückwärtig zugegriffen und vor jeder
+jump-Instruktion (für die for-Schleife) 2-mal um den Schlüssel auszulesen. Kein Block des Stacks wird durch
+die effiziente Ausnutzung aller Caller-saved Registern alloziiert. Unserer Behauptung nach ist das, der Grund der
 kurzen Laufzeit dieser Variante.
-[05:52]
-Als wir uns die Frage gestellt haben, ob eine noch kürzere Laufzeit möglich war, ist uns gefallen, eine neue Variante
-zu implementieren, die eine Folge der vorgerechneten s-Werte als zusäztlicher Parameter bekommt und die Datenwörter
-mit denen ver-/entschlüsselt, statt die in jeder Schritt der for-Schleife neu zu rechnen. Obwohl die reine C-Implementierung
-und die gleiche Implementierung die durch gcc mit Intirinsicsoptimisierung -O2 compiliert wurde+ 
-(vielleicht als Fußnote wo + stehtDie Messwerte der zweiten Variante sind auf der Tabelle nicht zu sehen, 
-da die Seitenpositionierung nur 7 Spalten ermöglicht. Bei dem Liniengraph kann man aber klar bemerken, 
-dass sie fast die gleiche Werte mit der gleichen Implementierung ohne Intirinsicsoptimiserung hat) längere Laufzeiten 
-haben, ist das bei der Assemblerimplementierung der C-Implementierung, die durch godbolt.com mit Intirinsicsoptimisierung
--O2 erstellt wurde nicht zu sehen. Ab 5 000 000 Runden ist der Unterschied der Laufzeiten zwischen dieser Implementierung 
-und unserer Assemblerimplementierung deutlich zu bemerken. Bei der letzten Messung mit 1 000 000 000 Runden beträgt 
-der Unterschied sogar 32,92 Sekunden bzw. ist das eine Kürzung der Laufzeit unserer Assemblerimplementierung um 
-11,65\%. Die Nachteile sind aber die 520-byte (65 * unsigned long integer) Speichernutzung für das Speichern der 
-s-Werte und die extra Speicherzugriffe, eine ganz am Anfang für die Registerzuweisung des letzten (beim Verschlüsseln)
-bzw. vorletzten (beim Entschlüsseln) s-Werts und zwei vor jeder jump-Instruktion (für die for-Schleife) für das Auslesen 
-der s-Werte, was in Rundenzahlen von 1000 bis 1 Mio. zu Laufzeiten länger als unsere Assemblerimplementierung führen.
-[05:52]
-Der Grund der fast verdoppelten Laufzeiten aller C-Implementierungen sind die mehrmalige Speicherzugriffe des compilierten
-Codes und das Nutzen des 64-bit long integers für die Variable s.
 
 \begin{table}[H]
-\centering 
+\centering
     \begin{tabular}{|l|l|l|l|l|l|l|}
      \hline 	       & V0 & V1 & V1 + O & V2 & V3 & V4  \\
      \hline 1000 & 0,000515 & 0,000956 & 0,000896 & 0.001395 & 0,000578  & 0,000826  \\
@@ -350,7 +331,7 @@ Codes und das Nutzen des 64-bit long integers für die Variable s.
 	 \hline 10 000 & 0,004291 & 0,009006 & 0,008139 & 0,010153 & 0,005189  &  0,007090 \\
 	 \hline 50 000 & 0,016369 & 0,028185 & 0,034074 & 0,040394 & 0,016101  & 0,027903 \\
      \hline 100 000 & 0,033843 & 0,051888 & 0,052219 & 0,057199 & 0,031028  & 0,049993 \\
-	 \hline 500 000 & 0,161601 & 0,261531 & 0,232815 & 0,299341 & 0,130571 & 0,359071\\
+	 \hline 500 000 & 0,161601 & 0,261531 & 0,232815 & 0,299341 & 0,265355 & 0,359071\\
 	 \hline 1 000 000 & 0,276192 & 0,505899 & 0,565311 & 0,535374 & 0,369269  & 0,545912 \\
 	 \hline 5 000 000 & 1,513316 & 2,494545 & 2,594821 & 2,767372 & 1,372651  & 2,501231\\
      \hline 10 000 000 & 2,789830 & 4,908691 & 5,012906 & 5,666716 & 2,557696  & 4,782643 \\
@@ -363,6 +344,22 @@ Codes und das Nutzen des 64-bit long integers für die Variable s.
     \caption{Laufzeit aller Varianten in Rundenzahl von 1000- 1Mrd in Sekunden als Tabelle}
 \end{table}
 
+Als wir uns die Frage gestellt haben, ob eine noch kürzere Laufzeit möglich war, ist uns gefallen, eine neue Variante
+zu implementieren, die eine Folge der vorgerechneten s-Werte als zusäztlicher Parameter bekommt und die Datenwörter
+mit denen ver-/entschlüsselt, statt die in jeder Schritt der for-Schleife neu zu rechnen. Obwohl die reine C-Implementierung
+und die gleiche Implementierung die durch gcc mit Intirinsicsoptimisierung -O2 compiliert wurde+
+(vielleicht als Fußnote wo + stehtDie Messwerte der zweiten Variante sind auf der Tabelle nicht zu sehen,
+da die Seitenpositionierung nur 7 Spalten ermöglicht. Bei dem Liniengraph kann man aber klar bemerken,
+dass sie fast die gleiche Werte mit der gleichen Implementierung ohne Intirinsicsoptimiserung hat) längere Laufzeiten
+haben, ist das bei der Assemblerimplementierung der C-Implementierung, die durch godbolt.com mit Intirinsicsoptimisierung
+-O2 erstellt wurde nicht zu sehen. Ab 5 000 000 Runden ist der Unterschied der Laufzeiten zwischen dieser Implementierung
+und unserer Assemblerimplementierung deutlich zu bemerken. Bei der letzten Messung mit 1 000 000 000 Runden beträgt
+der Unterschied sogar 32,92 Sekunden bzw. ist das eine Kürzung der Laufzeit unserer Assemblerimplementierung um
+11,65\%. Die Nachteile sind aber die 520-byte (65 * unsigned long integer) Speichernutzung für das Speichern der
+s-Werte und die extra Speicherzugriffe, eine ganz am Anfang für die Registerzuweisung des letzten (beim Verschlüsseln)
+bzw. vorletzten (beim Entschlüsseln) s-Werts und zwei vor jeder jump-Instruktion (für die for-Schleife) für das Auslesen
+der s-Werte, was in Rundenzahlen von 1000 bis 1 Mio. zu Laufzeiten länger als unsere Assemblerimplementierung führen.
+
 \begin{figure}[h]
 \centering
 \includegraphics[scale = 0.4]{Analyse.png}
@@ -370,10 +367,13 @@ Codes und das Nutzen des 64-bit long integers für die Variable s.
 \end{figure}
 \newpage
 
+Der Grund der fast verdoppelten Laufzeiten aller C-Implementierungen sind die mehrmalige Speicherzugriffe des compilierten
+Codes und das Nutzen des 64-bit long integers für die Variable s.
+
 \section{Zusammenfassung und Ausblick}
 XTEA ist ein Ver -und Entschlüsselungsalgorithmus, der auf die Feistelchiffre Struktur basiert und eine weitere Entwicklung von TEA ist, dabei ist er besondert geeignet für größere Datenblöcke. XTEA ist einfach zu implementieren, außer die Zuweisungen besteht XTEA nur aus einer einzigen For-Loop und drei Operationen, aber dennoch ist die Verschlüsselung sehr komplex. Zur Besserung des Algorithmus wurden das Padding mit dem PKCS\#7 Verfahren sowie das logische Shiften von Blöcken verwendet.  \\
-Was die Performanceanalyse zeigt stimmt mit unseren Erwartungen überein. Die Erweiterung von vorgerechneten Variable s hat einen Einfluss auf die Lauftzeit. Denn wenn man das Algorithmus mit einem vorgerechneten Variable s durchführt, nimmt die Lauftzeit ab, sowie erwartet.  ~\cite{WhatIsPKCS7}
-
+Was die Performanceanalyse zeigt stimmt mit unseren Erwartungen überein. Die Erweiterung von vorgerechneten Variable s hat einen Einfluss auf die Lauftzeit. Denn wenn man das Algorithmus mit einem vorgerechneten Variable s durchführt, nimmt die Lauftzeit ab, sowie erwartet.
+~\cite{whatispkcs7} ~\cite{al2017programmable} ~\cite{appel2016sicherheitsaspekte}.
 
 
 \newpage
