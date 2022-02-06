@@ -292,7 +292,7 @@ Jeder 8 Bytes Block wird unabhängig von anderen Blöcken verschlüsselt. Für d
     \caption{Block 2: e ASP mit Padding}
 \end{table}
 So kann jetzt Block 2 auch ohne Probleme verschlüsselt werden.\\
-Zusammengefasst lässt sich sagen, wenn die zu verschlüsselden Daten kürzer als ein Block ist, werden zu nächst das Padding angewendet und danach verschlüsselt. Wenn die Daten jedoch länger als ein Block entspricht, werden die Daten in mehrere Blocks aufgeteilt, jeweils 8 Bytes pro Block. Die Blocks werden unabhängig von einander verschlüsselt. Wenn ein Block nicht mit 8 Bytes voll gefüllt wird, wird es zuerst Padding verwendet und dann verschlüsselt.
+Zusammengefasst lässt sich sagen, wenn die zu verschlüsselden Daten kürzer als ein Block ist, werden zu nächst das Padding angewendet und danach verschlüsselt. Wenn die Daten jedoch länger als ein Block entspricht, werden die Daten in mehrere Blocks aufgeteilt, jeweils 8 Bytes pro Block. Die Blocks werden unabhängig von einander verschlüsselt. Wenn ein Block nicht mit 8 Bytes voll gefüllt wird, wird es zuerst Padding verwendet und dann verschlüsselt.~\cite{WhatIsPKCS7}
 
 
 %%test
@@ -305,7 +305,7 @@ Zusammengefasst lässt sich sagen, wenn die zu verschlüsselden Daten kürzer al
 \newpage
 
 \section{Performanzanalyse}
-Um die Performanz unserer Algorithmus zu analysieren, haben wir insgesamt 6 verschiedene Arten der Algorithmus programmiert und jeden (1000, 5000, 10 000, 50 000, 100 000, 500 000, 1 000 000, 5 000 000, 10 000 000, 50 000 000, 100 000 000, 500 000 000, 1 000 000 000)- mal laufen gelassen und die Ergebnisse bezeihungsweise nach wie vielen Sekunden das Programm terminiert hat analysiert. Die verschiedene Arten lauten:
+Um die Performanz unserer Algorithmus zu analysieren, haben wir insgesamt 6 verschiedene Varianten der Algorithmus programmiert und jeden (1000, 5000, 10 000, 50 000, 100 000, 500 000, 1 000 000, 5 000 000, 10 000 000, 50 000 000, 100 000 000, 500 000 000, 1 000 000 000)- mal laufen gelassen und die Ergebnisse, bezeihungsweise nach wie vielen Sekunden das Programm terminiert hat, gemessen. Für das Messen der Werte haben wir die clock()-Funktion, die die clock-tickts zur Aufrufzeit zurückgibt, und das macro CLOCKS\_PER\_SEC der Libarary time.h benutzt. Die verschiedene Varianten lauten:
 \begin{itemize}
 \item Unsere Assemblerimplementierung 
 \item Unsere C- Implementierung ohne Compileroptimierung
@@ -314,7 +314,32 @@ Um die Performanz unserer Algorithmus zu analysieren, haben wir insgesamt 6 vers
 \item Unsere C- Implementierung mit vorgerechneten s- Werte und mit Compileroptimisierung O2
 \item C-Implementierung von Needham and Wheeler ohne Compileroptimisierung (Die Datentypen der Variablen values und keys wurden wegen technischen Gründen von long zu uint32\_t verändert).
 \end{itemize}
-Die gemessene Werte sind auf den untensthenden graphische Darstellungen zu finden. Obwohl der Liniengraph bei den größeren Rundenanzahlen eine bessere Hinsicht der Unterschiede gibt, kann man die kleinere Werte gar nicht unterscheiden. Deshalb steht daneben eine Tabelle, auf der alle gemessene Werte stehen.
+Die gemessene Werte sind auf den untensthenden graphische Darstellungen zu finden. Obwohl der Liniengraph bei den größeren Rundenanzahlen eine bessere Hinsicht der Unterschiede gibt, kann man die kleinere Werte gar nicht unterscheiden. Deshalb steht daneben eine Tabelle, auf der alle gemessene Werte stehen.\\
+Beim Implementieren der Assembler-Variante ohne den vorgerechneten s-Werte war das Ziel den Speicher möglichst wenig
+zuzugreifen und die Stackallokationen möglichst viel zu vermeiden. Der Speicher wird ganz am Anfang für die 
+Zuweisung der zu ver-/entschlüsselnden Datenwörter bzw. ganz am Ende rückwärtig zugegriffen und vor jeder 
+jump-Instruktion (für die for-Schleife) 2-mal um den Schlüssel auszulesen. Kein Block des Stacks wird durch 
+die effiziente Ausnutzung aller Caller-saved Registern alloziiert. Unserer Behauptung nach ist das, der Grund der 
+kurzen Laufzeit dieser Variante.
+[05:52]
+Als wir uns die Frage gestellt haben, ob eine noch kürzere Laufzeit möglich war, ist uns gefallen, eine neue Variante
+zu implementieren, die eine Folge der vorgerechneten s-Werte als zusäztlicher Parameter bekommt und die Datenwörter
+mit denen ver-/entschlüsselt, statt die in jeder Schritt der for-Schleife neu zu rechnen. Obwohl die reine C-Implementierung
+und die gleiche Implementierung die durch gcc mit Intirinsicsoptimisierung -O2 compiliert wurde+ 
+(vielleicht als Fußnote wo + stehtDie Messwerte der zweiten Variante sind auf der Tabelle nicht zu sehen, 
+da die Seitenpositionierung nur 7 Spalten ermöglicht. Bei dem Liniengraph kann man aber klar bemerken, 
+dass sie fast die gleiche Werte mit der gleichen Implementierung ohne Intirinsicsoptimiserung hat) längere Laufzeiten 
+haben, ist das bei der Assemblerimplementierung der C-Implementierung, die durch godbolt.com mit Intirinsicsoptimisierung
+-O2 erstellt wurde nicht zu sehen. Ab 5 000 000 Runden ist der Unterschied der Laufzeiten zwischen dieser Implementierung 
+und unserer Assemblerimplementierung deutlich zu bemerken. Bei der letzten Messung mit 1 000 000 000 Runden beträgt 
+der Unterschied sogar 32,92 Sekunden bzw. ist das eine Kürzung der Laufzeit unserer Assemblerimplementierung um 
+11,65\%. Die Nachteile sind aber die 520-byte (65 * unsigned long integer) Speichernutzung für das Speichern der 
+s-Werte und die extra Speicherzugriffe, eine ganz am Anfang für die Registerzuweisung des letzten (beim Verschlüsseln)
+bzw. vorletzten (beim Entschlüsseln) s-Werts und zwei vor jeder jump-Instruktion (für die for-Schleife) für das Auslesen 
+der s-Werte, was in Rundenzahlen von 1000 bis 1 Mio. zu Laufzeiten länger als unsere Assemblerimplementierung führen.
+[05:52]
+Der Grund der fast verdoppelten Laufzeiten aller C-Implementierungen sind die mehrmalige Speicherzugriffe des compilierten
+Codes und das Nutzen des 64-bit long integers für die Variable s.
 
 \begin{table}[H]
 \centering 
@@ -347,10 +372,14 @@ Die gemessene Werte sind auf den untensthenden graphische Darstellungen zu finde
 
 \section{Zusammenfassung und Ausblick}
 XTEA ist ein Ver -und Entschlüsselungsalgorithmus, der auf die Feistelchiffre Struktur basiert und eine weitere Entwicklung von TEA ist, dabei ist er besondert geeignet für größere Datenblöcke. XTEA ist einfach zu implementieren, außer die Zuweisungen besteht XTEA nur aus einer einzigen For-Loop und drei Operationen, aber dennoch ist die Verschlüsselung sehr komplex. Zur Besserung des Algorithmus wurden das Padding mit dem PKCS\#7 Verfahren sowie das logische Shiften von Blöcken verwendet.  \\
-Was die Performanceanalyse zeigt stimmt mit unseren Erwartungen überein. Die Erweiterung von vorgerechneten Variable s hat einen Einfluss auf die Lauftzeit. Denn wenn man das Algorithmus mit einem vorgerechneten Variable s durchführt, nimmt die Lauftzeit ab, sowie erwartet.  
+Was die Performanceanalyse zeigt stimmt mit unseren Erwartungen überein. Die Erweiterung von vorgerechneten Variable s hat einen Einfluss auf die Lauftzeit. Denn wenn man das Algorithmus mit einem vorgerechneten Variable s durchführt, nimmt die Lauftzeit ab, sowie erwartet.  ~\cite{WhatIsPKCS7}
+
 
 
 \newpage
+\section{Bildquellen}
+Abbildung 1: https://www.hsg-kl.de/faecher/inf/krypto/feistel/index.php (23.01.2022, 18:23) \\
+Abbildung 2: https://www.researchgate.net/figure/Fig-1Two-Feistel-rounds-one-cycle-of-XTEA-III-EXISTING-ATTACKS-ON-XTEA-There-exist\_fig2\_229480139 (27.01.2022, 12:17)\\
 % TODO: Fuegen Sie Ihre Quellen der Datei Ausarbeitung.bib hinzu
 % Referenzieren Sie diese dann mit \cite{}.
 % Beispiel: CR2 ist ein Register der x86-Architektur~\cite{intel2017man}.
