@@ -149,6 +149,13 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
+    //we could not separate the padding function as its own since the whole implementation made use of different variables
+    //used in padding, but the code till the marked line can be evaluated as the padding function. we also did not think it was
+    //necessary to implement a new function for running the algorithm for encrypting data length of which is more than one block
+    //since it could be quite easily fixed with the variable blockCount. unsigned int blockCount = valueLen / 8;
+    //we always run the algorithm blockCount times no matter if the data is one block or more and it does not have an impact
+    //on the overall performance, since it is a simple division and if check if the data is one block long
+
     unsigned int blockCount = valueLen / 8; //size of blocks with no pad
     uint8_t padBytes = (-valueLen) & 7; //size of padding bytes
 
@@ -181,6 +188,8 @@ int main(int argc, char** argv) {
         free(valueTemp);
         blockCount++;
     }
+
+    //padding end
 
     uint32_t values[blockCount][2]; //2d array for all 2 * 4 blocks
 
@@ -249,7 +258,7 @@ int main(int argc, char** argv) {
         case false:
             for (int i = 0; i < blockCount; ++i) {
                 define_version(v, d, sums, values[i], keys);
-                printf("%X\n", values[i][0]);
+                printf("%X\n%X\n", values[i][0], values[i][1]);
                 for (int k = 0; k < 2; ++k) {
                     uint8_t tempChar[5];
                     tempChar[4] = '\n';
@@ -266,7 +275,8 @@ int main(int argc, char** argv) {
 
     }
 
-    if(d == true && (outputStr[strlen(outputStr) - 2] < 8 && outputStr[strlen(outputStr) - 2] > 0)){
+
+    if(d == true && (outputStr[strlen(outputStr) - 1] < 8 && outputStr[strlen(outputStr) - 1] > 0)){
         //if there should be a padding while encrypting obviously the padding bytes also get encrypted. when decrypted
         //chars corresponding to padding size will be displayed. to prevent this, we tried to strip the padding when
         //the encrypted message is written to output file. however, if the encrypted message without the padding bytes
@@ -304,7 +314,6 @@ int main(int argc, char** argv) {
         strncpy(outputTemp, &outputStr[0], valueLen - counter);
         free(outputStr);
         outputStr = outputTemp;
-        free(outputTemp);
     }
 
     fwrite(outputStr, sizeof(*outputStr), strlen(outputStr), output);
