@@ -22,9 +22,7 @@ Im Rahmen unseres Projektes im Fach Aspekte der systemnahen Programmierung bei d
 \newpage
 \section{Lösungsansatz}
 \subsection*{2.1.Feistelchiffre }
-Der XTEA Algorithmus ist ein Ver -und Ent
-
-schlüsselungsalgorithmus, welche auf die Struktur von Feistelchiffre basiert ist. Feistelchiffre ist eine Struktur, die für symmetrische Verschlüsselung verwendet wird. Unter symmetrische Verschlüsselung ist zu verstehen, dass für die Ver- und Entschlüsselung nur ein Key verwendet wird. Wir würden daher erstmal mit Feistelchiffre, die grundstruktur der symmetrische Verschlüsselung, eingehen.\\
+Der XTEA Algorithmus ist ein Ver -und Entschlüsselungsalgorithmus, welche auf die Struktur von Feistelchiffre basiert ist. Feistelchiffre ist eine Struktur, die für symmetrische Verschlüsselung verwendet wird. Unter symmetrische Verschlüsselung ist zu verstehen, dass für die Ver- und Entschlüsselung nur ein Key verwendet wird. Wir würden daher erstmal mit Feistelchiffre, die grundstruktur der symmetrische Verschlüsselung, eingehen.\\
 Feistelchiffre lässt sich in vier Schritten aufteilen. Zuerst hat man ein Klartextblock mit der Nachricht, weche meist 8 Bytes ist, und teilt diese in zwei gleich große Bl\"ocke L0 und R0, die 4 Bytes entsprechen auf.
 
 \begin{table}[H]
@@ -87,12 +85,12 @@ Die Entschlüsselung funktioniert im Prinzip genau wie die Verschlüsselung. Nur
 
 \subsection*{2.2.XTEA}
 Die Aufgabe des Projekts liegt darin den XTEA Algorithmus sowohl in C als auch in Assembler zu implmentieren. Für die Implementierung der XTEA Algorithmus soll man zunächst wissen wie XTEA überhaupt funktioniert. \\
-Das Verfahren von XTea ist auf Feistelchiffre basiert. Der eingelesene Wert, welcher 8 Byte entspricht, wird in zwei Blocken aufgeteilt, V1 und V2. Der Schlüssel bei XTEA beträgt 16 Bytes und wird in vier aufgeteilt, die jeweils 4 Bytes entsprichen. Für XTea brauchen wir zusätzlich noch eine weitere Variable s, die Summe, die immer nach der Verschlüsselung Vvon 1 mit der magischen Zahl ${\delta}$ addiert wird. ${\delta}$ lässt sich aus der Formel:
+Das Verfahren von XTea ist auf Feistelchiffre basiert. Der eingelesene Wert, welcher 8 Byte entspricht, wird in zwei Blocken aufgeteilt, V1 und V2. Der Schlüssel bei XTEA beträgt 16 Bytes und wird in vier aufgeteilt, die jeweils 4 Bytes entsprichen. Für XTea brauchen wir zusätzlich noch eine weitere Variable s, die Summe, die immer nach der Verschlüsselung von V1 mit der magischen Zahl ${\delta}$ addiert wird. ${\delta}$ lässt sich aus der Formel:
 \begin{equation}
      \delta  =   \lfloor ( \surd 5 -1)  \cdot  2^{31} \rfloor
 \end{equation}
 berechnen. Jede Runde findet eine doppelte Verschlüsselung statt. \\
-Zuerst ist die Verschlüsselung von V1. Da wird V2 in zwei Blöcken geshiftet. Block 1: V2 << 4 und Block: V2 >>5. Die zwei Blöcken werden per XOR zu einem neuen Ergebnis abgebildet und mit V2 addiert. Danach wird das Ergebnis mit der Summe von s, welche am Anfang Null ist, und der Schlüssel, dessen Index aus der Variable s Modulo drei ergibt, per XOR abgebildet. Zum Schluss wird das Ergebnis auf V1 addiert. \\
+Zuerst ist die Verschlüsselung von V1. Da wird V2 in zwei Blöcken geshiftet, bitweiser Shift. Block 1: V2 << 4 und Block: V2 >>5. Die zwei Blöcken werden per XOR zu einem neuen Ergebnis abgebildet und mit V2 addiert. Danach wird das Ergebnis mit der Summe von s, welche am Anfang Null ist, und der Schlüssel, dessen Index aus der Variable s Modulo drei ergibt, per XOR abgebildet. Zum Schluss wird das Ergebnis auf V1 addiert. \\
 Zur veranschaulichung nehmen wir wieder das Beispielwort "BEISPIEL", in Hex Code. Und teilen dieses Wort in V1 und V2 auf.  
 \begin{table}[H]
     
@@ -307,6 +305,17 @@ Zusammengefasst lässt sich sagen, wenn die zu verschlüsselden Daten kürzer al
 \newpage
 
 \section{Performanzanalyse}
+Um die Performanz unserer Algorithmus zu analysieren, haben wir insgesamt 6 verschiedene Arten der Algorithmus programmiert und jeden (1000, 5000, 10 000, 50 000, 100 000, 500 000, 1 000 000, 5 000 000, 10 000 000, 50 000 000, 100 000 000, 500 000 000, 1 000 000 000)- mal laufen gelassen und die Ergebnisse bezeihungsweise nach wie vielen Sekunden das Programm terminiert hat analysiert. Die verschiedene Arten lauten:
+\begin{itemize}
+\item Unsere Assemblerimplementierung 
+\item Unsere C- Implementierung ohne Compileroptimierung
+\item Unsere C- Implementierung mit Compileroptimierung O2
+\item Unsere C- Implementierung mit vorgerechneten s- Werte und ohne Compileroptimisierung
+\item Unsere C- Implementierung mit vorgerechneten s- Werte und mit Compileroptimisierung O2
+\item C-Implementierung von Needham and Wheeler ohne Compileroptimisierung (Die Datentypen der Variablen values und keys wurden wegen technischen Gründen von long zu uint32\_t verändert).
+\end{itemize}
+Die gemessene Werte sind auf den untensthenden graphische Darstellungen zu finden. Obwohl der Liniengraph bei den größeren Rundenanzahlen eine bessere Hinsicht der Unterschiede gibt, kann man die kleinere Werte gar nicht unterscheiden. Deshalb steht daneben eine Tabelle, auf der alle gemessene Werte stehen.
+
 \begin{table}[H]
 \centering 
     \begin{tabular}{|l|l|l|l|l|l|l|}
@@ -320,10 +329,10 @@ Zusammengefasst lässt sich sagen, wenn die zu verschlüsselden Daten kürzer al
 	 \hline 1 000 000 & 0,276192 & 0,505899 & 0,565311 & 0,535374 & 0,369269  & 0,545912 \\
 	 \hline 5 000 000 & 1,513316 & 2,494545 & 2,594821 & 2,767372 & 1,372651  & 2,501231\\
      \hline 10 000 000 & 2,789830 & 4,908691 & 5,012906 & 5,666716 & 2,557696  & 4,782643 \\
-	 \hline 50 000 000 & 15,390260 & 25,169309 & 24,009043 & 26,646462 & 13,021844  & 23,303044  \\
-	 \hline 100 000 000 & 29,156962 & 49,523281 & 45,654284 & 52,465012 & 24,372582 & 47,274614 \\
-	 \hline 500 000 000 & 139,996772 & 238,208462 & 229,905915 & 255,905915 & 130,031971 & 228,323564  \\
-     \hline 1 000 000 000 & 282,543366 & 515,398700 & 453,509581 & 536,207985 & 249,620164  & 470,815208 \\
+	 \hline 50 000 000 & 15,39026 & 25,16930 & 24,00904 & 26,64646 & 13,02184  & 23,30304  \\
+	 \hline 100 000 000 & 29,156962 & 49,52328 & 45,65428 & 52,46501 & 24,37258 & 47,27461 \\
+	 \hline 500 000 000 & 139,9967 & 238,2084 & 229,9059 & 255,9059 & 130,0319 & 228,3235 \\
+     \hline 1 000 000 000 & 282,5433 & 515,3987 & 453,5095 & 536,2079 & 249,6201  & 470,8152 \\
 	\hline
     \end{tabular}
     \caption{Laufzeit aller Varianten in Rundenzahl von 1000- 1Mrd in Sekunden als Tabelle}
@@ -337,8 +346,8 @@ Zusammengefasst lässt sich sagen, wenn die zu verschlüsselden Daten kürzer al
 \newpage
 
 \section{Zusammenfassung und Ausblick}
-XTEA ist ein Ver -und Entschlüsselungsalgorithmus, der auf die Feistelchiffre Struktur basiert und eine weitere Entwicklung von TEA ist. XTEA ist einfach zu implementieren, außer die Zuweisungen besteht XTEA nur aus ein einzige For-Loop und drei Operationen, aber dennoch ist die Verschlüsselung sehr komplex. 
-Was die Performanceanalyse zeigt stimmt mit unseren Erwartungen überein. Die Erweiterung von vorgerechneten Variable s hat einen Einfluss auf die Lauftzeit. Denn wenn man das Algorithmus mit einem vorgerechneten Variable s durchführt, nimmt die Lauftzeit ab, sowie erwartet.
+XTEA ist ein Ver -und Entschlüsselungsalgorithmus, der auf die Feistelchiffre Struktur basiert und eine weitere Entwicklung von TEA ist, dabei ist er besondert geeignet für größere Datenblöcke. XTEA ist einfach zu implementieren, außer die Zuweisungen besteht XTEA nur aus einer einzigen For-Loop und drei Operationen, aber dennoch ist die Verschlüsselung sehr komplex. Zur Besserung des Algorithmus wurden das Padding mit dem PKCS\#7 Verfahren sowie das logische Shiften von Blöcken verwendet.  \\
+Was die Performanceanalyse zeigt stimmt mit unseren Erwartungen überein. Die Erweiterung von vorgerechneten Variable s hat einen Einfluss auf die Lauftzeit. Denn wenn man das Algorithmus mit einem vorgerechneten Variable s durchführt, nimmt die Lauftzeit ab, sowie erwartet.  
 
 
 \newpage
