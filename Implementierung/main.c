@@ -15,7 +15,7 @@ const char* usage_msg =
 
 const char* help_msg =
         "Positional arguments:\n"
-        "  file   The file to encrypt or decrypt\n"
+        "  file   The file to encrypt or decrypt (You can use the file \"input.txt\". The message is BEISPIELAA)\n"
         "\n"
         "Optional arguments:\n"
         "  -V X   Runs the chosen version of implementation\n"
@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
                 d = true;
                 break;
             case 'k':
-                printf("Can't parse key right now. Predefined key will be used.\n");
+                printf("Keyparser is unfortunately not implemented. Predefined key aspaspaspaspaspa will be used.\n");
                 break;
             case 'i':
                 initVec = atoi(optarg);
